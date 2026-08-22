@@ -3,9 +3,9 @@
 (function(){
   /* checkout - 1 link por kit, na ordem dos cards: 1 / 3 / 6 potes */
   var KIT_LINKS=[
-    '[SEU-LINK-CHECKOUT]', /* 1 pote - R$ 98,90 */
-    '[SEU-LINK-CHECKOUT]', /* 3 potes - R$ 167,90 */
-    '[SEU-LINK-CHECKOUT]'  /* 6 potes - R$ 267,90 */
+    'https://plataforma-vendas.pages.dev/checkout/BELAPLEX?v=1-frasco',  /* 1 pote - R$ 98,90 */
+    'https://plataforma-vendas.pages.dev/checkout/BELAPLEX?v=3-frascos', /* 3 potes - R$ 167,90 */
+    'https://plataforma-vendas.pages.dev/checkout/BELAPLEX?v=6-frascos'  /* 6 potes - R$ 267,90 */
   ];
   var WHATSAPP=''; /* numero vem do PAINEL via /api/page-config — nao edite aqui. Vazio = botao nao aparece. */
   var WA_MSG='Olá! Quero saber sobre o Belaplex Cápsulas 💜';
@@ -25,7 +25,7 @@
     });
   }
   applyWhatsApp();
-  try{fetch('[SEU-LINK-CHECKOUT]/api/page-config').then(function(r){return r.json();}).then(function(d){WHATSAPP=(d&&d.whatsapp)?d.whatsapp:'';applyWhatsApp();}).catch(function(){});}catch(e){}
+  try{fetch('https://plataforma-vendas.pages.dev/api/page-config?slug=BELAPLEX').then(function(r){return r.json();}).then(function(d){WHATSAPP=(d&&d.whatsapp)?d.whatsapp:'';applyWhatsApp();}).catch(function(){});}catch(e){}
   var cds=[].slice.call(document.querySelectorAll('.font-mono.tabular-nums')).filter(function(s){
     return /^\s*\d{1,2}\s*:\s*\d{2}\s*$/.test((s.textContent||'').replace(/[\u00a0\u200b]/g,' ').replace(/<!--.*?-->/g,''));
   });
