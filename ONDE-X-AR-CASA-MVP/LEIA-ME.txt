@@ -1,30 +1,21 @@
-ONDE X — VISÃO COMPUTACIONAL MVP
+ONDE X — TESTE MÍNIMO DE CÂMERA PARA iPHONE
 
-Este MVP NÃO usa WebXR, ARKit, Zapworks, cartão ou instalação.
+Este arquivo foi reduzido ao mínimo possível:
+- sem WebXR
+- sem AR.js
+- sem Three.js
+- sem canvas
+- sem visão computacional
+- sem bibliotecas externas
 
-OBJETIVO DO TESTE
-- Abrir câmera em Safari/Chrome usando getUserMedia.
-- ADMIN salva uma referência visual do esconderijo.
-- PROCURAR compara continuamente a câmera com a referência.
-- Quando o enquadramento fica suficientemente semelhante por vários ciclos, o X é revelado.
+Ele usa apenas navigator.mediaDevices.getUserMedia() + <video playsinline>.
 
-COMO TESTAR
-1. Publique index.html no seu domínio HTTPS.
-2. Abra pelo Safari do iPhone ou Chrome/Android.
-3. Toque ABRIR CÂMERA e permita acesso.
-4. ADMIN: aponte para uma área com bastante detalhe visual (por exemplo, uma estante ou canto decorado).
-5. Toque SALVAR ESTE LOCAL.
-6. Toque PROCURAR.
-7. Vire para outro lado e depois tente reencontrar o mesmo enquadramento.
-8. A barra mostra a semelhança visual. Quando ela permanecer alta, o X aparece.
+TESTE:
+1. Substitua a versão anterior no seu domínio HTTPS por este index.html.
+2. Abra no Safari do iPhone.
+3. Toque ABRIR CÂMERA.
+4. Toque Permitir.
+5. Se a imagem da câmera aparecer atrás do logo ONDE X, o mecanismo-base está funcionando.
 
-IMPORTANTE
-Este é um teste de reconhecimento visual 2D, não uma âncora 3D real. O X aparece no centro quando
-o enquadramento salvo é reconhecido. Mudanças fortes de iluminação, distância, ângulo ou objetos
-podem reduzir o reconhecimento.
-
-A etapa seguinte, se este fluxo funcionar bem no iPhone, é trocar o descritor simples por
-feature matching/homografia para localizar a referência dentro da imagem e colocar o X na posição
-correta mesmo com mudança moderada de ângulo e distância.
-
-Use apenas em local seguro e pare para olhar a câmera; não caminhe olhando apenas para a tela.
+Depois disso, a próxima versão deve manter exatamente este código de câmera e adicionar o X por cima,
+sem alterar a inicialização que foi validada.
