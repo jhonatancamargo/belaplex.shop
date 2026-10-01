@@ -1,0 +1,35 @@
+ONDE X — MVP AR PARA TESTE DENTRO DE CASA
+
+O QUE ESTE TESTE FAZ
+- Usa a câmera do celular.
+- Usa um marcador visual como âncora do ambiente.
+- No modo ADMIN você ajusta:
+  * esquerda/direita
+  * altura
+  * frente/atrás
+  * tamanho
+  * rotação
+- Salva a posição do X.
+- No modo PROCURAR, você movimenta a câmera pelo ambiente.
+- O X aparece somente quando a câmera reconhece a âncora.
+
+COMO TESTAR
+1. A pasta precisa ser publicada em HTTPS para a câmera funcionar de forma confiável no celular.
+2. Abra marcador.html e imprima o marcador, ou mostre-o em outra tela.
+3. Coloque o marcador em um local seguro dentro de casa.
+4. Abra index.html no celular e permita a câmera.
+5. Em ADMIN, aponte para o marcador e ajuste o X.
+6. Toque SALVAR X.
+7. Toque PROCURAR.
+8. Afaste-se, mova a câmera pelo ambiente e tente encontrar o local novamente.
+
+LIMITAÇÃO IMPORTANTE
+Este primeiro MVP usa um marcador visível para manter o X preso ao local. Ele testa a mecânica
+principal sem exigir um app nativo. Ele ainda NÃO entende paredes, móveis ou profundidade real,
+então não consegue esconder corretamente o X atrás de um objeto físico.
+
+A versão final deverá usar AR espacial/âncoras persistentes e, quando suportado pelo aparelho,
+oclusão/depth para permitir esconder o X atrás de objetos reais.
+
+Use apenas locais seguros; não procure olhando para a tela enquanto caminha em escadas, ruas ou
+outros lugares que exijam atenção ao ambiente.

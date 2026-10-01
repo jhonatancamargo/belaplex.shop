@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>ONDE X — AR Casa</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.7/aframe/build/aframe-ar.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#08090d;color:#fff;font-family:Arial,sans-serif}
+#ui{position:fixed;z-index:20;inset:0 0 auto 0;padding:10px;pointer-events:none}
+.bar,.panel{pointer-events:auto;background:#0d0f14e8;border:1px solid #30343d;border-radius:16px;padding:10px;max-width:520px;margin:auto}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px}.logo{font-size:23px;font-weight:950}.logo b{color:#ff531b}
+button{min-height:42px;border-radius:11px;border:1px solid #3a3e47;background:#191c23;color:#fff;font-weight:850;padding:0 11px}button.on{background:#ff531b;border-color:#ff531b}.panel{margin-top:8px}
+.row{display:flex;gap:7px;flex-wrap:wrap}.row button{flex:1;min-width:90px}.small{font-size:12px;color:#a5a9b1}.status{text-align:center;font-weight:900;margin:8px 0}.hide{display:none!important}
+label{font-size:12px;color:#bbb;display:block;margin-top:7px}input[type=range]{width:100%}
+#found{position:fixed;z-index:30;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:20px}
+#found .box{background:#111319;border:1px solid #444;border-radius:22px;padding:24px;text-align:center;max-width:380px}.big{font-size:80px;color:#ff531b;font-weight:950}
+#hint{position:fixed;z-index:18;bottom:18px;left:12px;right:12px;text-align:center;background:#0d0f14dc;border:1px solid #343842;border-radius:14px;padding:10px;font-weight:800}
+a-scene{position:fixed!important;inset:0}
+</style>
+</head>
+<body>
+<div id="ui">
+ <div class="bar">
+   <div><div class="logo">ONDE <b>X</b></div><div class="small">MVP AR dentro de casa</div></div>
+   <div><button id="adminBtn" class="on">ADMIN</button><button id="huntBtn">PROCURAR</button></div>
+ </div>
+ <div id="adminPanel" class="panel">
+   <div class="status" id="markerStatus">🔎 Aponte a câmera para o marcador</div>
+   <div class="small">Quando o marcador aparecer, ajuste onde o X ficará em relação a ele e toque em SALVAR.</div>
+   <label>↔ Esquerda / direita: <b id="vx">0.00</b></label><input id="x" type="range" min="-2" max="2" step=".05" value="0">
+   <label>↕ Altura: <b id="vy">0.45</b></label><input id="y" type="range" min="0" max="3" step=".05" value=".45">
+   <label>↗ Frente / atrás: <b id="vz">0.00</b></label><input id="z" type="range" min="-2" max="2" step=".05" value="0">
+   <label>⤢ Tamanho: <b id="vs">0.65</b></label><input id="s" type="range" min=".15" max="2.5" step=".05" value=".65">
+   <label>⟳ Rotação: <b id="vr">0°</b></label><input id="r" type="range" min="0" max="360" step="5" value="0">
+   <div class="row" style="margin-top:9px"><button id="save">💾 SALVAR X</button><button id="reset">REDEFINIR</button></div>
+ </div>
+ <div id="huntPanel" class="panel hide">
+   <div class="status" id="huntStatus">📷 PROCURE O X PELO AMBIENTE</div>
+   <div class="small">O X não aparece até a câmera encontrar a âncora. Mova o celular devagar pelo ambiente.</div>
+ </div>
+</div>
+
+<div id="hint">Primeiro coloque o marcador no lugar onde deseja esconder o X.</div>
+
+<div id="found"><div class="box"><div class="big">X</div><h1>VOCÊ ACHOU!</h1><p>O X virtual estava escondido neste local.</p><button id="continue">CONTINUAR TESTE</button></div></div>
+
+<a-scene embedded vr-mode-ui="enabled:false" renderer="logarithmicDepthBuffer:true; antialias:true" arjs="sourceType:webcam;debugUIEnabled:false;trackingMethod:best;">
+  <a-marker id="anchor" preset="hiro">
+    <a-entity id="xobj" position="0 .45 0" scale=".65 .65 .65">
+      <a-torus color="#ff531b" radius=".36" radius-tubular=".055" rotation="90 0 0"></a-torus>
+      <a-box color="#ff531b" width=".18" height="1.05" depth=".12" rotation="0 0 45"></a-box>
+      <a-box color="#ff531b" width=".18" height="1.05" depth=".12" rotation="0 0 -45"></a-box>
+      <a-sphere color="#ff9a27" radius=".07" position="0 .62 0"></a-sphere>
+    </a-entity>
+  </a-marker>
+  <a-entity camera></a-entity>
+</a-scene>
+
+<script>
+(()=>{
+const key='ondex_ar_home_v1';
+const $=id=>document.getElementById(id);
+let mode='admin', seen=false;
+let cfg={x:0,y:.45,z:0,s:.65,r:0};
+try{cfg={...cfg,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){}
+const anchor=$('anchor'), obj=$('xobj');
+function apply(){
+ obj.setAttribute('position',`${cfg.x} ${cfg.y} ${cfg.z}`);
+ obj.setAttribute('scale',`${cfg.s} ${cfg.s} ${cfg.s}`);
+ obj.setAttribute('rotation',`0 ${cfg.r} 0`);
+ ['x','y','z','s','r'].forEach(k=>$(k).value=cfg[k]);
+ $('vx').textContent=(+cfg.x).toFixed(2);$('vy').textContent=(+cfg.y).toFixed(2);$('vz').textContent=(+cfg.z).toFixed(2);$('vs').textContent=(+cfg.s).toFixed(2);$('vr').textContent=Math.round(cfg.r)+'°';
+ obj.setAttribute('visible',mode==='admin');
+}
+['x','y','z','s','r'].forEach(k=>$(k).addEventListener('input',e=>{cfg[k]=+e.target.value;apply()}));
+$('save').onclick=()=>{localStorage.setItem(key,JSON.stringify(cfg));$('markerStatus').textContent='✓ X SALVO NESTA ÂNCORA';$('hint').textContent='Agora toque em PROCURAR, saia da frente do marcador e tente reencontrá-lo.'};
+$('reset').onclick=()=>{cfg={x:0,y:.45,z:0,s:.65,r:0};apply()};
+function setMode(m){
+ mode=m;seen=false;
+ $('adminBtn').classList.toggle('on',m==='admin');$('huntBtn').classList.toggle('on',m==='hunt');
+ $('adminPanel').classList.toggle('hide',m!=='admin');$('huntPanel').classList.toggle('hide',m!=='hunt');
+ obj.setAttribute('visible',m==='admin');
+ $('hint').textContent=m==='admin'?'Aponte para o marcador e ajuste o X.':'Procure pelo ambiente. O X só será revelado quando a âncora for reconhecida.';
+}
+$('adminBtn').onclick=()=>setMode('admin');$('huntBtn').onclick=()=>setMode('hunt');
+anchor.addEventListener('markerFound',()=>{
+ if(mode==='admin'){$('markerStatus').textContent='🟠 ÂNCORA ENCONTRADA — POSICIONE O X';obj.setAttribute('visible',true)}
+ else{
+   obj.setAttribute('visible',true);$('huntStatus').textContent='🔥 X DETECTADO — OLHE AO REDOR';
+   if(!seen){seen=true;setTimeout(()=>{$('found').style.display='flex'},900)}
+ }
+});
+anchor.addEventListener('markerLost',()=>{
+ if(mode==='admin')$('markerStatus').textContent='🔎 Âncora fora da câmera';
+ else{obj.setAttribute('visible',false);$('huntStatus').textContent='📷 PROCURE O X PELO AMBIENTE'}
+});
+$('continue').onclick=()=>{$('found').style.display='none';seen=false};
+apply();
+})();
+</script>
+</body></html>
