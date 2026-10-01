@@ -1,31 +1,34 @@
-ONDE X — AR CASA V3
+ONDE X — MVP WEBXR ESPACIAL
 
-POR QUE A V2 NÃO FUNCIONAVA COMO O ESPERADO
-A V2 salvava uma posição 2D na tela. Ao mover a câmera, não existia um mapa 3D do cômodo para
-manter o X preso ao ambiente.
-
-A V3 USA UMA ÂNCORA VISUAL
-O X fica posicionado em coordenadas 3D relativas ao marcador Hiro. Isso permite mover o celular
-e reencontrar o X no mesmo ponto relativo à âncora.
+OBJETIVO
+Validar o comportamento central do produto:
+1. câmera AR;
+2. detecção de uma superfície real;
+3. colocar um X naquela superfície;
+4. mudar o tamanho;
+5. virar/andar com o celular;
+6. voltar e verificar se o X permanece no mesmo ponto durante a sessão.
 
 COMO TESTAR
-1. Publique os arquivos em HTTPS.
-2. Imprima marcador.html (ou abra o marcador em outra tela).
-3. Coloque o marcador em local seguro, plano e iluminado.
-4. Abra index.html pelo celular.
-5. Toque INICIAR CÂMERA AR.
-6. ADMIN: aponte para o marcador.
-7. Ajuste esquerda/direita, altura, frente/atrás, tamanho e rotação.
-8. O tamanho agora vai de 0.03 até 2.00.
-9. Toque FIXAR X.
-10. Toque PROCURAR.
-11. Tire o marcador do enquadramento e depois procure novamente com a câmera.
-12. Quando a câmera reconhecer a âncora, o X reaparece na posição 3D salva.
+- Publique index.html em HTTPS.
+- Abra no celular.
+- A própria página executa um diagnóstico:
+  HTTPS / WebXR / immersive-ar.
+- Só habilita INICIAR TESTE AR se o navegador declarar suporte.
+- Inicie o AR.
+- Mova o celular lentamente para o aparelho mapear o ambiente.
+- Aponte o centro para uma mesa ou chão.
+- Quando aparecer SUPERFÍCIE DETECTADA, toque COLOCAR X AQUI.
+- Ajuste o tamanho.
+- Vire a câmera para outro lado, dê alguns passos com cuidado e volte.
 
-LIMITAÇÃO DESTE MVP
-A câmera precisa enxergar o marcador para localizar a âncora. Isto é proposital para validar
-a mecânica de esconder/relocalizar de forma estável no navegador.
+IMPORTANTE
+WebXR immersive-ar, hit-test e anchors têm suporte limitado e dependem do navegador/aparelho.
+O arquivo não tenta falsificar AR quando o aparelho não oferece o recurso: ele mostra o diagnóstico.
 
-Para a versão final sem marcador visível, será necessário usar rastreamento espacial persistente
-(WebXR quando disponível, ou app com ARCore/ARKit). Para esconder o X realmente atrás de móveis,
-paredes ou outros objetos, também será necessária oclusão/depth em aparelhos compatíveis.
+Este MVP mantém a âncora durante a sessão. Persistir o mesmo X depois de fechar o navegador ou
+permitir que OUTRO celular encontre exatamente a mesma âncora é uma etapa diferente. Para o produto
+ONDE X completo, isso exigirá uma solução de âncoras persistentes/compartilhadas, provavelmente
+via ARCore/ARKit ou infraestrutura AR equivalente.
+
+Use em ambiente seguro, sem caminhar olhando apenas para a tela perto de escadas ou obstáculos.

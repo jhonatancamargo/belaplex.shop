@@ -2,102 +2,118 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>ONDE X — AR Casa V3</title>
-<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.7/aframe/build/aframe-ar.min.js"></script>
+<title>ONDE X — WebXR Espacial</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050609;font-family:Arial,sans-serif;color:#fff}
-#boot{position:fixed;z-index:999;inset:0;background:#07080b;display:flex;align-items:center;justify-content:center;padding:20px}
-.bootbox{max-width:470px;text-align:center}.bigx{font-size:85px;font-weight:950;color:#ff5018}.bootbox button{width:100%;height:54px;font-size:17px}
-#ui{position:fixed;z-index:50;inset:0;pointer-events:none}.top{position:absolute;top:9px;left:9px;right:9px;display:flex;justify-content:space-between;gap:8px}
-.logo,.modes,.panel{pointer-events:auto;background:#0b0d12e8;border:1px solid #363a44;border-radius:14px}.logo{padding:9px 12px;font-size:21px;font-weight:950}.logo b{color:#ff5018}.modes{padding:5px;display:flex;gap:5px}
-button{min-height:42px;border:1px solid #3a3f49;border-radius:10px;background:#191c23;color:#fff;font-weight:850;padding:0 11px}button.on,button.primary{background:#ff5018;border-color:#ff5018}
-.panel{position:absolute;left:9px;bottom:9px;width:min(440px,calc(100% - 18px));padding:11px}.status{font-weight:950;margin-bottom:4px}.small{font-size:12px;color:#b1b4bc;line-height:1.35}
-label{display:flex;justify-content:space-between;font-size:11px;color:#c1c3c9;margin-top:6px}input[type=range]{width:100%}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1}
-#error{color:#ffd3c5;background:#29140e;border:1px solid #72321e;padding:9px;border-radius:10px;margin-top:10px;display:none;text-align:left;font-size:12px}
-#found{position:fixed;z-index:1000;inset:0;background:#000d;display:none;align-items:center;justify-content:center;text-align:center}.foundbox{padding:24px}.foundbox button{min-width:220px}
-a-scene{position:fixed!important;inset:0!important}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090d;color:#fff;font-family:Arial,sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#home{position:fixed;z-index:30;inset:0;background:#08090d;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:min(480px,100%);background:#111319;border:1px solid #30343d;border-radius:20px;padding:20px}.logo{font-size:31px;font-weight:950}.logo b{color:#ff5018}.muted{color:#a7abb4;font-size:13px;line-height:1.45}
+button{min-height:48px;border:1px solid #3a3e48;border-radius:12px;background:#191c23;color:#fff;font-weight:900;padding:0 14px;font-size:15px}button.primary{background:#ff5018;border-color:#ff5018}button:disabled{opacity:.45}
+.full{width:100%}.diag{margin:13px 0;background:#181b22;border-radius:12px;padding:11px;font-size:13px}.ok{color:#77d89a}.bad{color:#ff9b7d}
+#hud{position:fixed;z-index:20;inset:0;pointer-events:none;display:none}.top{position:absolute;left:9px;right:9px;top:9px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.pill,.panel{pointer-events:auto;background:#0b0d12e8;border:1px solid #373b45;border-radius:14px;padding:9px 11px}.pill{font-weight:900}.panel{position:absolute;left:9px;bottom:9px;width:min(440px,calc(100% - 18px))}
+.status{font-weight:950}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1;min-width:0}.small{font-size:12px;color:#b1b4bc}.reticle{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #0005}.reticle:after{content:"";position:absolute;inset:11px;border-radius:50%;background:#ff5018}
+#sizeBox{display:none;margin-top:8px}input{width:100%}
+#msg{margin-top:6px}
 </style>
 </head><body>
-<div id="boot"><div class="bootbox"><div class="bigx">X</div><h1>ONDE X — AR V3</h1><p style="color:#aaa">Este teste usa uma âncora visual para manter o X preso ao mesmo lugar do ambiente.</p><button id="go" class="primary">📷 INICIAR CÂMERA AR</button><div id="error"></div><p class="small">Use HTTPS e permita a câmera. Para o primeiro teste, use o marcador fornecido no ZIP.</p></div></div>
+<canvas id="gl"></canvas>
+<div id="home"><div class="card">
+ <div class="logo">ONDE <b>X</b></div><h2>Teste AR espacial</h2>
+ <p class="muted">Este teste usa WebXR hit-test para detectar superfícies reais. Você aponta para uma mesa ou chão, toca para colocar o X e depois movimenta o celular para conferir se ele continua naquele ponto.</p>
+ <div class="diag">
+   <div id="secure">⏳ Verificando HTTPS…</div>
+   <div id="xr">⏳ Verificando WebXR…</div>
+   <div id="ar">⏳ Verificando AR imersiva…</div>
+ </div>
+ <button id="start" class="primary full" disabled>INICIAR TESTE AR</button>
+ <div id="why" class="muted" style="margin-top:10px"></div>
+</div></div>
 
-<div id="ui">
- <div class="top"><div class="logo">ONDE <b>X</b></div><div class="modes"><button id="admin" class="on">ADMIN</button><button id="hunt">PROCURAR</button></div></div>
+<div id="hud">
+ <div class="top"><div class="pill">ONDE <span style="color:#ff5018">X</span></div><button id="exit">SAIR</button></div>
+ <div class="reticle" id="reticle"></div>
  <div class="panel">
-  <div id="status" class="status">🔎 Procurando a âncora...</div>
-  <div id="help" class="small">Aponte a câmera para o marcador. Quando ele for reconhecido, o X aparecerá preso a ele.</div>
-  <div id="controls">
-   <label><span>↔ Esquerda / direita</span><b id="tx">0.00</b></label><input id="px" type="range" min="-3" max="3" step=".05" value="0">
-   <label><span>↕ Altura</span><b id="ty">0.40</b></label><input id="py" type="range" min="-2" max="3" step=".05" value=".4">
-   <label><span>↗ Frente / atrás</span><b id="tz">0.00</b></label><input id="pz" type="range" min="-3" max="3" step=".05" value="0">
-   <label><span>⤢ Tamanho</span><b id="ts">0.30</b></label><input id="scale" type="range" min=".03" max="2" step=".01" value=".30">
-   <label><span>⟳ Rotação</span><b id="tr">0°</b></label><input id="rot" type="range" min="0" max="360" step="5" value="0">
-   <div class="row"><button id="save" class="primary">💾 FIXAR X</button><button id="reset">REDEFINIR</button></div>
-  </div>
+   <div class="status" id="status">Mova o celular devagar para detectar uma superfície.</div>
+   <div id="msg" class="small">Aponte o centro da tela para uma mesa ou para o chão.</div>
+   <div id="sizeBox"><label class="small">Tamanho do X: <b id="sizeVal">30 cm</b></label><input id="size" type="range" min="8" max="100" value="30"></div>
+   <div class="row"><button id="place" class="primary" disabled>❌ COLOCAR X AQUI</button><button id="hide" disabled>👁 ESCONDER/VER</button></div>
  </div>
 </div>
 
-<div id="found"><div class="foundbox"><div class="bigx">X</div><h1>X ENCONTRADO!</h1><p>Você reencontrou a âncora onde o X foi escondido.</p><button id="continue">CONTINUAR</button></div></div>
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170.0/+esm";
 
-<a-scene id="scene" embedded vr-mode-ui="enabled:false" renderer="antialias:true;alpha:true" arjs="sourceType:webcam;debugUIEnabled:false;trackingMethod:best;" style="display:none">
- <a-marker id="marker" preset="hiro" emitevents="true">
-   <a-entity id="xroot" position="0 .4 0" scale=".3 .3 .3">
-     <a-box position="0 0 0" width=".20" height="1.25" depth=".12" rotation="0 0 45" material="color:#ff4d18;metalness:.15;roughness:.3"></a-box>
-     <a-box position="0 0 0" width=".20" height="1.25" depth=".12" rotation="0 0 -45" material="color:#ff4d18;metalness:.15;roughness:.3"></a-box>
-     <a-sphere position="0 .72 0" radius=".08" material="color:#ff9b2a"></a-sphere>
-   </a-entity>
- </a-marker>
- <a-entity camera></a-entity>
-</a-scene>
+const $=id=>document.getElementById(id);
+let session=null,refSpace=null,viewerSpace=null,hitSource=null,latestHit=null,anchor=null;
+let renderer,scene,camera,reticle3D,xGroup=null,xVisible=true,placedMatrix=null;
+const canvas=$('gl');
 
-<script>
-(()=>{
-const $=id=>document.getElementById(id), key='ondex_ar_v3';
-let mode='admin', foundOnce=false;
-let cfg={x:0,y:.4,z:0,s:.30,r:0};
-try{cfg={...cfg,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){}
-const root=$('xroot'), marker=$('marker');
-function apply(){
- root.setAttribute('position',`${cfg.x} ${cfg.y} ${cfg.z}`);
- root.setAttribute('scale',`${cfg.s} ${cfg.s} ${cfg.s}`);
- root.setAttribute('rotation',`0 ${cfg.r} 0`);
- $('px').value=cfg.x;$('py').value=cfg.y;$('pz').value=cfg.z;$('scale').value=cfg.s;$('rot').value=cfg.r;
- $('tx').textContent=(+cfg.x).toFixed(2);$('ty').textContent=(+cfg.y).toFixed(2);$('tz').textContent=(+cfg.z).toFixed(2);$('ts').textContent=(+cfg.s).toFixed(2);$('tr').textContent=Math.round(cfg.r)+'°';
-}
-apply();
-$('go').onclick=async()=>{
- if(!window.isSecureContext && location.hostname!=='localhost'){
-  $('error').style.display='block';$('error').innerHTML='<b>Esta página não está em contexto seguro.</b><br>Publique em HTTPS para liberar a câmera AR.';return;
- }
+async function diagnostic(){
+ $('secure').innerHTML=(window.isSecureContext?'<span class="ok">✓ HTTPS/contexto seguro</span>':'<span class="bad">✗ Precisa abrir em HTTPS</span>');
+ if(!navigator.xr){$('xr').innerHTML='<span class="bad">✗ WebXR não existe neste navegador</span>';$('ar').innerHTML='<span class="bad">✗ AR espacial indisponível</span>';$('why').textContent='Este navegador/aparelho não oferece WebXR AR. Teste em um aparelho Android compatível com AR usando um navegador que ofereça immersive-ar.';return}
+ $('xr').innerHTML='<span class="ok">✓ WebXR detectado</span>';
  try{
-  const test=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
-  test.getTracks().forEach(t=>t.stop());
-  $('boot').style.display='none';$('scene').style.display='block';
- }catch(e){
-  $('error').style.display='block';$('error').innerHTML='<b>A câmera não foi liberada.</b><br>Permita o acesso à câmera nas configurações do navegador.<br>Erro: '+(e.name||'desconhecido');
- }
-};
-['px','py','pz','scale','rot'].forEach(id=>$(id).addEventListener('input',e=>{
- const map={px:'x',py:'y',pz:'z',scale:'s',rot:'r'};cfg[map[id]]=+e.target.value;apply();
-}));
-$('save').onclick=()=>{localStorage.setItem(key,JSON.stringify(cfg));$('status').textContent='✓ X FIXADO NA ÂNCORA';$('help').textContent='Agora mude para PROCURAR, tire a câmera do marcador e tente reencontrá-lo.'};
-$('reset').onclick=()=>{cfg={x:0,y:.4,z:0,s:.30,r:0};localStorage.removeItem(key);apply()};
-function setMode(m){
- mode=m;foundOnce=false;$('admin').classList.toggle('on',m==='admin');$('hunt').classList.toggle('on',m==='hunt');$('controls').style.display=m==='admin'?'block':'none';
- root.setAttribute('visible',m==='admin');
- if(m==='hunt'){$('status').textContent='📷 PROCURANDO X';$('help').textContent='Mova a câmera pelo ambiente. Quando a âncora entrar no enquadramento, o X volta exatamente à posição salva.'}
- else{$('status').textContent='🔎 Procurando a âncora...';$('help').textContent='Aponte para o marcador para ajustar o esconderijo.'}
+  const ok=await navigator.xr.isSessionSupported('immersive-ar');
+  $('ar').innerHTML=ok?'<span class="ok">✓ immersive-ar disponível</span>':'<span class="bad">✗ immersive-ar não suportado neste aparelho/navegador</span>';
+  $('start').disabled=!(ok&&window.isSecureContext);
+  if(ok&&window.isSecureContext)$('why').textContent='Compatível. Toque em INICIAR TESTE AR.';
+ }catch(e){$('ar').innerHTML='<span class="bad">✗ Não foi possível verificar immersive-ar</span>';$('why').textContent=e.message||String(e)}
 }
-$('admin').onclick=()=>setMode('admin');$('hunt').onclick=()=>setMode('hunt');
-marker.addEventListener('markerFound',()=>{
- if(mode==='admin'){root.setAttribute('visible',true);$('status').textContent='🟠 ÂNCORA ENCONTRADA';$('help').textContent='Agora ajuste posição, profundidade, tamanho e rotação.'}
- else{root.setAttribute('visible',true);$('status').textContent='🔥 X DETECTADO';if(!foundOnce){foundOnce=true;setTimeout(()=>$('found').style.display='flex',900)}}
-});
-marker.addEventListener('markerLost',()=>{
- if(mode==='hunt')root.setAttribute('visible',false);
- $('status').textContent=mode==='hunt'?'📷 PROCURANDO X':'🔎 Âncora fora da câmera';
-});
-$('continue').onclick=()=>{$('found').style.display='none';foundOnce=false;if(mode==='hunt')root.setAttribute('visible',false)};
-})();
-</script>
-</body></html>
+diagnostic();
+
+function makeX(){
+ const g=new THREE.Group();
+ const mat=new THREE.MeshStandardMaterial({color:0xff4d18,roughness:.35,metalness:.1});
+ const geo=new THREE.BoxGeometry(.055,.36,.035);
+ const a=new THREE.Mesh(geo,mat),b=new THREE.Mesh(geo,mat);a.rotation.z=Math.PI/4;b.rotation.z=-Math.PI/4;g.add(a,b);
+ const light=new THREE.PointLight(0xff7b32,1.4,1);light.position.set(0,.1,.12);g.add(light);return g;
+}
+function setupGL(){
+ const gl=canvas.getContext('webgl',{xrCompatible:true,alpha:true,antialias:true});
+ renderer=new THREE.WebGLRenderer({canvas,context:gl,alpha:true,antialias:true});
+ renderer.autoClear=true;renderer.xr.enabled=true;
+ scene=new THREE.Scene();camera=new THREE.PerspectiveCamera();
+ scene.add(new THREE.HemisphereLight(0xffffff,0x555555,2));
+ reticle3D=new THREE.Mesh(new THREE.RingGeometry(.055,.07,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff}));
+ reticle3D.matrixAutoUpdate=false;reticle3D.visible=false;scene.add(reticle3D);
+}
+$('start').onclick=async()=>{
+ try{
+  setupGL();
+  session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['local','hit-test'],optionalFeatures:['anchors','dom-overlay'],domOverlay:{root:$('hud')}});
+  await renderer.xr.setSession(session);
+  refSpace=await session.requestReferenceSpace('local');
+  viewerSpace=await session.requestReferenceSpace('viewer');
+  hitSource=await session.requestHitTestSource({space:viewerSpace});
+  $('home').style.display='none';$('hud').style.display='block';
+  session.addEventListener('end',()=>{$('home').style.display='flex';$('hud').style.display='none';session=null});
+  session.requestAnimationFrame(frame);
+ }catch(e){$('why').textContent='Não foi possível iniciar: '+(e.message||e.name);$('home').style.display='flex'}
+};
+function frame(t,frame){
+ const s=frame.session;s.requestAnimationFrame(frame);
+ const hits=hitSource?frame.getHitTestResults(hitSource):[];
+ latestHit=hits.length?hits[0]:null;
+ if(latestHit&&!xGroup){
+  const pose=latestHit.getPose(refSpace);reticle3D.visible=true;reticle3D.matrix.fromArray(pose.transform.matrix);
+  $('place').disabled=false;$('status').textContent='✓ SUPERFÍCIE DETECTADA';$('msg').textContent='Toque em COLOCAR X AQUI.';
+ }else if(!latestHit&&!xGroup){reticle3D.visible=false;$('place').disabled=true}
+ if(anchor&&xGroup){
+  const pose=frame.getPose(anchor.anchorSpace,refSpace);
+  if(pose){xGroup.visible=xVisible;xGroup.matrix.fromArray(pose.transform.matrix)}
+ } else if(xGroup&&placedMatrix){xGroup.matrix.copy(placedMatrix);xGroup.visible=xVisible}
+ renderer.render(scene,camera);
+}
+$('place').onclick=async()=>{
+ if(!latestHit)return;
+ const pose=latestHit.getPose(refSpace);placedMatrix=new THREE.Matrix4().fromArray(pose.transform.matrix);
+ if(xGroup)scene.remove(xGroup);xGroup=makeX();xGroup.matrixAutoUpdate=false;xGroup.matrix.copy(placedMatrix);scene.add(xGroup);
+ try{if(typeof latestHit.createAnchor==='function')anchor=await latestHit.createAnchor()}catch(e){anchor=null}
+ reticle3D.visible=false;$('place').disabled=true;$('hide').disabled=false;$('sizeBox').style.display='block';
+ $('status').textContent=anchor?'❌ X ANCORADO NO AMBIENTE':'❌ X POSICIONADO';
+ $('msg').textContent=anchor?'Agora vire o celular, dê alguns passos e volte. O X deve continuar preso ao ponto físico.':'Seu aparelho não ativou XRAnchor; o teste usa a referência espacial da sessão e pode derivar mais.';
+};
+$('size').oninput=e=>{if(!xGroup)return;const cm=+e.target.value;$('sizeVal').textContent=cm+' cm';const scale=cm/30;xGroup.scale.setScalar(scale)};
+$('hide').onclick=()=>{xVisible=!xVisible;$('hide').textContent=xVisible?'🙈 ESCONDER':'👁 MOSTRAR'};
+$('exit').onclick=()=>session&&session.end();
+</script></body></html>
