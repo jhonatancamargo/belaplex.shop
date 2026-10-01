@@ -1,72 +1,103 @@
 <!doctype html>
-<html lang="pt-BR"><head>
+<html lang="pt-BR">
+<head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>ONDE X AR — Teste de câmera</title>
+<title>ONDE X — AR Casa V3</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.7/aframe/build/aframe-ar.min.js"></script>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050609;color:white;font-family:Arial,sans-serif}
-#cam{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#050609}
-#stage{position:fixed;inset:0;pointer-events:none;perspective:900px}
-#x3d{position:absolute;left:50%;top:50%;width:120px;height:120px;transform:translate(-50%,-50%);pointer-events:auto;display:none}
-#x3d:before,#x3d:after{content:"";position:absolute;left:50%;top:50%;width:25px;height:130px;border-radius:12px;background:linear-gradient(#ff9829,#ff3615);box-shadow:0 0 24px #ff4b1988}
-#x3d:before{transform:translate(-50%,-50%) rotate(45deg)}#x3d:after{transform:translate(-50%,-50%) rotate(-45deg)}
-#top{position:fixed;z-index:20;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none}
-.logo,.modes{pointer-events:auto;background:#0c0e13df;border:1px solid #343842;border-radius:15px;padding:9px 12px}.logo{font-size:23px;font-weight:950}.logo b{color:#ff5018}.modes{display:flex;gap:6px}
-button{min-height:43px;border:1px solid #3b404a;border-radius:11px;background:#181b22;color:#fff;padding:0 13px;font-weight:900;cursor:pointer}button.on,button.primary{background:#ff5018;border-color:#ff5018}
-#panel{position:fixed;z-index:20;left:12px;bottom:12px;width:min(430px,calc(100% - 24px));background:#0c0e13e8;border:1px solid #343842;border-radius:17px;padding:12px}
-.small{font-size:12px;color:#afb2ba}.status{font-weight:950;font-size:16px;margin-bottom:6px}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1}
-label{font-size:11px;color:#bbb;display:block;margin-top:7px}input[type=range]{width:100%}
-#start{position:fixed;z-index:100;inset:0;background:#07080b;display:flex;align-items:center;justify-content:center;padding:20px}
-.startbox{width:min(470px,100%);text-align:center}.mark{font-size:86px;font-weight:950;color:#ff5018}.startbox h1{margin:0 0 8px;font-size:30px}.startbox p{color:#aeb1b8;line-height:1.45}.startbox button{width:100%;height:54px;font-size:17px}.error{margin-top:12px;background:#25120d;border:1px solid #71301e;border-radius:12px;padding:10px;text-align:left;display:none;color:#ffd4c6;font-size:13px}
-#found{position:fixed;z-index:80;inset:0;background:#000d;display:none;align-items:center;justify-content:center}.foundbox{text-align:center}.foundbox .mark{font-size:110px}
-@media(max-width:600px){#top{top:7px;left:7px;right:7px}.logo{font-size:19px}.logo,.modes{padding:7px}.modes button{padding:0 9px;min-height:40px}#panel{left:7px;bottom:7px;width:calc(100% - 14px)}}
-</style></head><body>
-<video id="cam" autoplay playsinline muted></video>
-<div id="stage"><div id="x3d" aria-label="X virtual"></div></div>
-<div id="top"><div class="logo">ONDE <b>X</b> <span style="font-size:10px;color:#aaa">AR V2</span></div><div class="modes"><button id="admin" class="on">ADMIN</button><button id="hunt">PROCURAR</button></div></div>
-<div id="panel">
- <div id="status" class="status">📷 Câmera pronta</div>
- <div id="desc" class="small">No ADMIN, toque na imagem da câmera para colocar o X naquele ponto.</div>
- <div id="controls">
-  <label>Tamanho <span id="sv">100%</span></label><input id="size" type="range" min="40" max="240" value="100">
-  <label>Rotação <span id="rv">0°</span></label><input id="rot" type="range" min="-180" max="180" value="0">
-  <div class="row"><button id="save" class="primary">💾 SALVAR X</button><button id="clear">REDEFINIR</button></div>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050609;font-family:Arial,sans-serif;color:#fff}
+#boot{position:fixed;z-index:999;inset:0;background:#07080b;display:flex;align-items:center;justify-content:center;padding:20px}
+.bootbox{max-width:470px;text-align:center}.bigx{font-size:85px;font-weight:950;color:#ff5018}.bootbox button{width:100%;height:54px;font-size:17px}
+#ui{position:fixed;z-index:50;inset:0;pointer-events:none}.top{position:absolute;top:9px;left:9px;right:9px;display:flex;justify-content:space-between;gap:8px}
+.logo,.modes,.panel{pointer-events:auto;background:#0b0d12e8;border:1px solid #363a44;border-radius:14px}.logo{padding:9px 12px;font-size:21px;font-weight:950}.logo b{color:#ff5018}.modes{padding:5px;display:flex;gap:5px}
+button{min-height:42px;border:1px solid #3a3f49;border-radius:10px;background:#191c23;color:#fff;font-weight:850;padding:0 11px}button.on,button.primary{background:#ff5018;border-color:#ff5018}
+.panel{position:absolute;left:9px;bottom:9px;width:min(440px,calc(100% - 18px));padding:11px}.status{font-weight:950;margin-bottom:4px}.small{font-size:12px;color:#b1b4bc;line-height:1.35}
+label{display:flex;justify-content:space-between;font-size:11px;color:#c1c3c9;margin-top:6px}input[type=range]{width:100%}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1}
+#error{color:#ffd3c5;background:#29140e;border:1px solid #72321e;padding:9px;border-radius:10px;margin-top:10px;display:none;text-align:left;font-size:12px}
+#found{position:fixed;z-index:1000;inset:0;background:#000d;display:none;align-items:center;justify-content:center;text-align:center}.foundbox{padding:24px}.foundbox button{min-width:220px}
+a-scene{position:fixed!important;inset:0!important}
+</style>
+</head><body>
+<div id="boot"><div class="bootbox"><div class="bigx">X</div><h1>ONDE X — AR V3</h1><p style="color:#aaa">Este teste usa uma âncora visual para manter o X preso ao mesmo lugar do ambiente.</p><button id="go" class="primary">📷 INICIAR CÂMERA AR</button><div id="error"></div><p class="small">Use HTTPS e permita a câmera. Para o primeiro teste, use o marcador fornecido no ZIP.</p></div></div>
+
+<div id="ui">
+ <div class="top"><div class="logo">ONDE <b>X</b></div><div class="modes"><button id="admin" class="on">ADMIN</button><button id="hunt">PROCURAR</button></div></div>
+ <div class="panel">
+  <div id="status" class="status">🔎 Procurando a âncora...</div>
+  <div id="help" class="small">Aponte a câmera para o marcador. Quando ele for reconhecido, o X aparecerá preso a ele.</div>
+  <div id="controls">
+   <label><span>↔ Esquerda / direita</span><b id="tx">0.00</b></label><input id="px" type="range" min="-3" max="3" step=".05" value="0">
+   <label><span>↕ Altura</span><b id="ty">0.40</b></label><input id="py" type="range" min="-2" max="3" step=".05" value=".4">
+   <label><span>↗ Frente / atrás</span><b id="tz">0.00</b></label><input id="pz" type="range" min="-3" max="3" step=".05" value="0">
+   <label><span>⤢ Tamanho</span><b id="ts">0.30</b></label><input id="scale" type="range" min=".03" max="2" step=".01" value=".30">
+   <label><span>⟳ Rotação</span><b id="tr">0°</b></label><input id="rot" type="range" min="0" max="360" step="5" value="0">
+   <div class="row"><button id="save" class="primary">💾 FIXAR X</button><button id="reset">REDEFINIR</button></div>
+  </div>
  </div>
 </div>
-<div id="start"><div class="startbox"><div class="mark">X</div><h1>Teste AR dentro de casa</h1><p>Primeiro precisamos liberar a câmera. Depois você poderá apontar o celular para um lugar, tocar na tela e esconder o X virtual.</p><button id="activate" class="primary">📷 ATIVAR CÂMERA</button><div id="err" class="error"></div><p class="small" id="protocol"></p></div></div>
-<div id="found"><div class="foundbox"><div class="mark">X</div><h1>X ENCONTRADO!</h1><button id="back">CONTINUAR</button></div></div>
+
+<div id="found"><div class="foundbox"><div class="bigx">X</div><h1>X ENCONTRADO!</h1><p>Você reencontrou a âncora onde o X foi escondido.</p><button id="continue">CONTINUAR</button></div></div>
+
+<a-scene id="scene" embedded vr-mode-ui="enabled:false" renderer="antialias:true;alpha:true" arjs="sourceType:webcam;debugUIEnabled:false;trackingMethod:best;" style="display:none">
+ <a-marker id="marker" preset="hiro" emitevents="true">
+   <a-entity id="xroot" position="0 .4 0" scale=".3 .3 .3">
+     <a-box position="0 0 0" width=".20" height="1.25" depth=".12" rotation="0 0 45" material="color:#ff4d18;metalness:.15;roughness:.3"></a-box>
+     <a-box position="0 0 0" width=".20" height="1.25" depth=".12" rotation="0 0 -45" material="color:#ff4d18;metalness:.15;roughness:.3"></a-box>
+     <a-sphere position="0 .72 0" radius=".08" material="color:#ff9b2a"></a-sphere>
+   </a-entity>
+ </a-marker>
+ <a-entity camera></a-entity>
+</a-scene>
+
 <script>
 (()=>{
-const $=x=>document.getElementById(x), video=$('cam'), x=$('x3d'), start=$('start'), err=$('err');
-let mode='admin', cfg={left:50,top:50,size:100,rot:0}, stream=null;
-try{cfg={...cfg,...JSON.parse(localStorage.getItem('ondex_ar_v2')||'{}')}}catch(e){}
-function apply(){x.style.left=cfg.left+'%';x.style.top=cfg.top+'%';x.style.width=cfg.size*1.2+'px';x.style.height=cfg.size*1.2+'px';x.style.transform=`translate(-50%,-50%) rotate(${cfg.rot}deg)`;$('size').value=cfg.size;$('rot').value=cfg.rot;$('sv').textContent=cfg.size+'%';$('rv').textContent=cfg.rot+'°'}
+const $=id=>document.getElementById(id), key='ondex_ar_v3';
+let mode='admin', foundOnce=false;
+let cfg={x:0,y:.4,z:0,s:.30,r:0};
+try{cfg={...cfg,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){}
+const root=$('xroot'), marker=$('marker');
+function apply(){
+ root.setAttribute('position',`${cfg.x} ${cfg.y} ${cfg.z}`);
+ root.setAttribute('scale',`${cfg.s} ${cfg.s} ${cfg.s}`);
+ root.setAttribute('rotation',`0 ${cfg.r} 0`);
+ $('px').value=cfg.x;$('py').value=cfg.y;$('pz').value=cfg.z;$('scale').value=cfg.s;$('rot').value=cfg.r;
+ $('tx').textContent=(+cfg.x).toFixed(2);$('ty').textContent=(+cfg.y).toFixed(2);$('tz').textContent=(+cfg.z).toFixed(2);$('ts').textContent=(+cfg.s).toFixed(2);$('tr').textContent=Math.round(cfg.r)+'°';
+}
 apply();
-$('protocol').textContent='Endereço atual: '+location.protocol+'//'+location.host;
-$('activate').onclick=async()=>{
- err.style.display='none';
- if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){err.style.display='block';err.innerHTML='<b>A câmera foi bloqueada pelo navegador.</b><br>Abra esta página por HTTPS ou localhost. Se o endereço começar com file://, publique a pasta em seu domínio HTTPS.';return}
+$('go').onclick=async()=>{
+ if(!window.isSecureContext && location.hostname!=='localhost'){
+  $('error').style.display='block';$('error').innerHTML='<b>Esta página não está em contexto seguro.</b><br>Publique em HTTPS para liberar a câmera AR.';return;
+ }
  try{
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
-  video.srcObject=stream;await video.play();start.style.display='none';
- }catch(e){err.style.display='block';err.innerHTML='<b>Não consegui abrir a câmera.</b><br>Verifique o ícone de câmera na barra de endereço e escolha Permitir. No celular, prefira Chrome/Android ou Safari/iPhone e use HTTPS.<br><br>Erro: '+(e.name||'desconhecido')}
+  const test=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+  test.getTracks().forEach(t=>t.stop());
+  $('boot').style.display='none';$('scene').style.display='block';
+ }catch(e){
+  $('error').style.display='block';$('error').innerHTML='<b>A câmera não foi liberada.</b><br>Permita o acesso à câmera nas configurações do navegador.<br>Erro: '+(e.name||'desconhecido');
+ }
 };
-$('stage').addEventListener('pointerdown',e=>{
- if(mode!=='admin'||start.style.display!=='none')return;
- if(e.target===x)return;
- cfg.left=e.clientX/innerWidth*100;cfg.top=e.clientY/innerHeight*100;x.style.display='block';apply();$('status').textContent='🟠 X POSICIONADO';$('desc').textContent='Ajuste tamanho/rotação e salve.';
-});
-$('size').oninput=e=>{cfg.size=+e.target.value;apply()};$('rot').oninput=e=>{cfg.rot=+e.target.value;apply()};
-$('save').onclick=()=>{localStorage.setItem('ondex_ar_v2',JSON.stringify(cfg));x.style.display='block';$('status').textContent='✓ X SALVO';$('desc').textContent='Agora toque em PROCURAR e tente reencontrar o local.'};
-$('clear').onclick=()=>{localStorage.removeItem('ondex_ar_v2');cfg={left:50,top:50,size:100,rot:0};x.style.display='none';apply()};
-function setMode(m){mode=m;$('admin').classList.toggle('on',m==='admin');$('hunt').classList.toggle('on',m==='hunt');$('controls').style.display=m==='admin'?'block':'none';if(m==='hunt'){x.style.display='none';$('status').textContent='🔎 PROCURANDO X';$('desc').textContent='Mova a câmera. Neste teste V2, toque no ponto onde você acredita que o X foi escondido.'}else{x.style.display='block';$('status').textContent='ADMIN — POSICIONE O X';$('desc').textContent='Toque na imagem da câmera para posicionar.'}}
+['px','py','pz','scale','rot'].forEach(id=>$(id).addEventListener('input',e=>{
+ const map={px:'x',py:'y',pz:'z',scale:'s',rot:'r'};cfg[map[id]]=+e.target.value;apply();
+}));
+$('save').onclick=()=>{localStorage.setItem(key,JSON.stringify(cfg));$('status').textContent='✓ X FIXADO NA ÂNCORA';$('help').textContent='Agora mude para PROCURAR, tire a câmera do marcador e tente reencontrá-lo.'};
+$('reset').onclick=()=>{cfg={x:0,y:.4,z:0,s:.30,r:0};localStorage.removeItem(key);apply()};
+function setMode(m){
+ mode=m;foundOnce=false;$('admin').classList.toggle('on',m==='admin');$('hunt').classList.toggle('on',m==='hunt');$('controls').style.display=m==='admin'?'block':'none';
+ root.setAttribute('visible',m==='admin');
+ if(m==='hunt'){$('status').textContent='📷 PROCURANDO X';$('help').textContent='Mova a câmera pelo ambiente. Quando a âncora entrar no enquadramento, o X volta exatamente à posição salva.'}
+ else{$('status').textContent='🔎 Procurando a âncora...';$('help').textContent='Aponte para o marcador para ajustar o esconderijo.'}
+}
 $('admin').onclick=()=>setMode('admin');$('hunt').onclick=()=>setMode('hunt');
-$('stage').addEventListener('click',e=>{
- if(mode!=='hunt')return;
- const px=e.clientX/innerWidth*100,py=e.clientY/innerHeight*100;
- const d=Math.hypot(px-cfg.left,py-cfg.top);
- if(d<10){x.style.display='block';$('status').textContent='🔥 X DETECTADO';setTimeout(()=>$('found').style.display='flex',500)}
- else{$('status').textContent='❌ NADA AQUI';setTimeout(()=>{$('status').textContent='🔎 PROCURANDO X'},900)}
+marker.addEventListener('markerFound',()=>{
+ if(mode==='admin'){root.setAttribute('visible',true);$('status').textContent='🟠 ÂNCORA ENCONTRADA';$('help').textContent='Agora ajuste posição, profundidade, tamanho e rotação.'}
+ else{root.setAttribute('visible',true);$('status').textContent='🔥 X DETECTADO';if(!foundOnce){foundOnce=true;setTimeout(()=>$('found').style.display='flex',900)}}
 });
-$('back').onclick=()=>{$('found').style.display='none';x.style.display='none'};
+marker.addEventListener('markerLost',()=>{
+ if(mode==='hunt')root.setAttribute('visible',false);
+ $('status').textContent=mode==='hunt'?'📷 PROCURANDO X':'🔎 Âncora fora da câmera';
+});
+$('continue').onclick=()=>{$('found').style.display='none';foundOnce=false;if(mode==='hunt')root.setAttribute('visible',false)};
 })();
-</script></body></html>
+</script>
+</body></html>

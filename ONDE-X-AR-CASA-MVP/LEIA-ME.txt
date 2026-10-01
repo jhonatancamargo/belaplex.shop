@@ -1,24 +1,31 @@
-ONDE X AR CASA — V2
+ONDE X — AR CASA V3
 
-Esta versão corrige a tela preta silenciosa:
-- Há um botão ATIVAR CÂMERA.
-- O navegador mostra um erro claro se a câmera estiver bloqueada.
-- A câmera ocupa toda a tela.
-- Interface adaptada para celular e PC.
+POR QUE A V2 NÃO FUNCIONAVA COMO O ESPERADO
+A V2 salvava uma posição 2D na tela. Ao mover a câmera, não existia um mapa 3D do cômodo para
+manter o X preso ao ambiente.
 
-IMPORTANTE:
-Para câmera via navegador, teste em HTTPS ou localhost.
-Se você abrir index.html diretamente e o endereço for file://..., a câmera pode ser bloqueada.
+A V3 USA UMA ÂNCORA VISUAL
+O X fica posicionado em coordenadas 3D relativas ao marcador Hiro. Isso permite mover o celular
+e reencontrar o X no mesmo ponto relativo à âncora.
 
-TESTE RÁPIDO:
-1. Hospede index.html no seu domínio HTTPS.
-2. Abra no CELULAR.
-3. Toque ATIVAR CÂMERA e permita o acesso.
-4. ADMIN: toque na imagem para posicionar o X, ajuste tamanho/rotação e SALVAR.
-5. PROCURAR: mova a câmera e toque onde acha que o X foi escondido.
+COMO TESTAR
+1. Publique os arquivos em HTTPS.
+2. Imprima marcador.html (ou abra o marcador em outra tela).
+3. Coloque o marcador em local seguro, plano e iluminado.
+4. Abra index.html pelo celular.
+5. Toque INICIAR CÂMERA AR.
+6. ADMIN: aponte para o marcador.
+7. Ajuste esquerda/direita, altura, frente/atrás, tamanho e rotação.
+8. O tamanho agora vai de 0.03 até 2.00.
+9. Toque FIXAR X.
+10. Toque PROCURAR.
+11. Tire o marcador do enquadramento e depois procure novamente com a câmera.
+12. Quando a câmera reconhecer a âncora, o X reaparece na posição 3D salva.
 
-LIMITAÇÃO DESTA V2:
-Ela foi feita primeiro para validar câmera + fluxo de esconder/procurar.
-A posição salva é relativa à tela, não uma âncora espacial persistente no cômodo.
-Para o X permanecer realmente preso a uma mesa/parede mesmo após você andar pela casa,
-a próxima etapa precisa usar rastreamento espacial WebXR/ARCore/ARKit ou um app AR.
+LIMITAÇÃO DESTE MVP
+A câmera precisa enxergar o marcador para localizar a âncora. Isto é proposital para validar
+a mecânica de esconder/relocalizar de forma estável no navegador.
+
+Para a versão final sem marcador visível, será necessário usar rastreamento espacial persistente
+(WebXR quando disponível, ou app com ARCore/ARKit). Para esconder o X realmente atrás de móveis,
+paredes ou outros objetos, também será necessária oclusão/depth em aparelhos compatíveis.
