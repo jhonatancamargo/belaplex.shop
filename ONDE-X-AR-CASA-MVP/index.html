@@ -1,72 +1,75 @@
 <!doctype html>
 <html lang="pt-BR"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<title>ONDE X — Teste 2</title>
+<title>ONDE X — Rastreamento Visual</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Arial,sans-serif}
-#camera{position:fixed;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
-#work{display:none}
-#x{position:fixed;z-index:5;left:50%;top:50%;width:90px;height:90px;transform:translate(-50%,-50%);display:none;pointer-events:none}
-#x:before,#x:after{content:"";position:absolute;left:50%;top:50%;width:18px;height:100px;border-radius:9px;background:linear-gradient(#ff9b29,#ff3e16);box-shadow:0 0 16px #ff4e1888}
+#cam{position:fixed;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
+#cv{display:none}
+#x{position:fixed;z-index:6;left:50%;top:50%;width:82px;height:82px;transform:translate(-50%,-50%);display:none;pointer-events:none}
+#x:before,#x:after{content:"";position:absolute;left:50%;top:50%;width:17px;height:94px;border-radius:9px;background:linear-gradient(#ff9b29,#ff3e16);box-shadow:0 0 15px #ff4e1888}
 #x:before{transform:translate(-50%,-50%) rotate(45deg)}#x:after{transform:translate(-50%,-50%) rotate(-45deg)}
+#ret{position:fixed;z-index:5;width:150px;height:150px;border:2px dashed #ff6a25;border-radius:16px;transform:translate(-50%,-50%);display:none;pointer-events:none}
 #ui{position:fixed;z-index:10;inset:0;pointer-events:none}.top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:8px}
-.logo,.tabs,.panel{pointer-events:auto;background:#0a0c11e8;border:1px solid #3a3e47;border-radius:14px}.logo{padding:9px 12px;font-size:21px;font-weight:950}.logo b{color:#ff5018}.tabs{padding:5px;display:flex;gap:5px}
-button{min-height:44px;border:1px solid #3c414b;border-radius:10px;background:#191c23;color:#fff;font-weight:900;padding:0 11px}button.on,button.primary{background:#ff5018;border-color:#ff5018}
-.panel{position:absolute;left:8px;bottom:8px;width:min(460px,calc(100% - 16px));padding:11px}.status{font-weight:950}.small{font-size:12px;color:#b6b9c0;line-height:1.35}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1}
-label{font-size:11px;color:#ccc;display:flex;justify-content:space-between;margin-top:6px}input{width:100%}.meter{height:8px;background:#282c34;border-radius:20px;overflow:hidden;margin-top:8px}.meter span{display:block;height:100%;width:0;background:#ff5018}
-#start{position:fixed;z-index:30;inset:0;background:#08090d;display:flex;align-items:center;justify-content:center;padding:20px}.card{width:min(460px,100%);text-align:center}.bigx{font-size:88px;font-weight:950;color:#ff5018}.card button{width:100%;height:56px;font-size:17px}
-#error{display:none;margin-top:10px;background:#29140e;border:1px solid #71311f;border-radius:10px;padding:10px;color:#ffd4c7;text-align:left;font-size:12px}
-#found{position:fixed;z-index:40;inset:0;background:#000d;display:none;align-items:center;justify-content:center;text-align:center}
+.logo,.panel{pointer-events:auto;background:#090b10e8;border:1px solid #3a3f49;border-radius:14px}.logo{padding:9px 12px;font-size:21px;font-weight:950}.logo b{color:#ff5018}
+.panel{position:absolute;bottom:8px;left:8px;width:min(470px,calc(100% - 16px));padding:11px}
+button{min-height:46px;border:1px solid #414650;border-radius:11px;background:#191c23;color:#fff;font-weight:900;padding:0 11px}.primary{background:#ff5018;border-color:#ff5018}.row{display:flex;gap:7px;margin-top:8px}.row button{flex:1}
+.small{font-size:12px;color:#b8bbc2;line-height:1.35}.status{font-weight:950}.meter{height:8px;background:#282c34;border-radius:20px;overflow:hidden;margin-top:8px}.meter span{height:100%;width:0;display:block;background:#ff5018}
+#start{position:fixed;z-index:30;inset:0;background:#08090d;display:flex;align-items:center;justify-content:center;padding:20px}.card{width:min(460px,100%);text-align:center}.big{font-size:86px;color:#ff5018;font-weight:950}.card button{width:100%;height:56px}
+#error{display:none;margin-top:10px;padding:10px;background:#2b130e;border:1px solid #73301e;border-radius:10px;color:#ffd3c6;text-align:left;font-size:12px}
 </style></head><body>
-<video id="camera" autoplay muted playsinline webkit-playsinline></video>
-<canvas id="work" width="128" height="96"></canvas>
-<div id="x"></div>
-<div id="ui">
- <div class="top"><div class="logo">ONDE <b>X</b></div><div class="tabs"><button id="admin" class="on">ADMIN</button><button id="hunt">PROCURAR</button></div></div>
- <div class="panel">
-  <div id="status" class="status">ADMIN — escolha o local</div>
-  <div id="help" class="small">Aponte para um ponto com detalhes e toque na tela onde quer deixar o X.</div>
-  <div id="adminControls">
-   <label><span>Tamanho</span><b id="sizeVal">100%</b></label><input id="size" type="range" min="20" max="180" value="100">
-   <div class="row"><button id="save" class="primary">📸 FIXAR X + REFERÊNCIA</button><button id="clear">LIMPAR</button></div>
-  </div>
-  <div id="huntControls" style="display:none">
-   <div class="meter"><span id="bar"></span></div><div id="score" class="small">Procure o local salvo.</div>
-  </div>
- </div>
-</div>
-<div id="start"><div class="card"><div class="bigx">X</div><h1>ONDE X — Teste 2</h1><p class="small">Usa exatamente o mesmo mecanismo de câmera que funcionou no seu iPhone.</p><button id="open" class="primary">📷 ABRIR CÂMERA</button><div id="error"></div></div></div>
-<div id="found"><div><div class="bigx">X</div><h1>X ENCONTRADO!</h1><button id="again">CONTINUAR</button></div></div>
+<video id="cam" autoplay muted playsinline webkit-playsinline></video>
+<canvas id="cv" width="320" height="240"></canvas><div id="ret"></div><div id="x"></div>
+<div id="ui"><div class="top"><div class="logo">ONDE <b>X</b></div></div>
+<div class="panel"><div id="status" class="status">ADMIN — marque o esconderijo</div>
+<div id="help" class="small">Toque na imagem sobre um ponto com detalhes. Depois fixe o X e mova o celular devagar.</div>
+<div class="meter"><span id="meter"></span></div><div id="quality" class="small">Rastreamento aguardando.</div>
+<div class="row"><button id="fix" class="primary">📍 FIXAR X AQUI</button><button id="reset">REPOSICIONAR</button></div></div></div>
+<div id="start"><div class="card"><div class="big">X</div><h1>Rastreamento visual</h1><p class="small">A câmera usa o mesmo mecanismo que já funcionou. O X será rastreado pelos detalhes visuais próximos do ponto marcado.</p><button id="open" class="primary">📷 ABRIR CÂMERA</button><div id="error"></div></div></div>
 <script>
 (()=>{
-const $=id=>document.getElementById(id),video=$('camera'),work=$('work'),ctx=work.getContext('2d',{willReadFrequently:true});
-let mode='admin',ref=null,xp=50,yp=50,size=100,running=false,stable=0,last=0;
-function applyX(){let el=$('x');el.style.left=xp+'%';el.style.top=yp+'%';el.style.transform=`translate(-50%,-50%) scale(${size/100})`; $('sizeVal').textContent=size+'%'}
-applyX();
+const $=x=>document.getElementById(x),cam=$('cam'),can=$('cv'),ctx=can.getContext('2d',{willReadFrequently:true});
+let ax=.5,ay=.5,fixed=false,prev=null,pts=[],last=0;
 $('open').onclick=async()=>{try{
- const s=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'environment'}});
- video.srcObject=s;video.muted=true;video.setAttribute('playsinline','');await video.play();$('start').style.display='none';running=true;requestAnimationFrame(loop)
+ let s=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'environment'}});
+ cam.srcObject=s;cam.muted=true;cam.setAttribute('playsinline','');await cam.play();$('start').style.display='none';requestAnimationFrame(loop)
 }catch(e){$('error').style.display='block';$('error').textContent=(e.name||'Erro')+': '+(e.message||e)}};
-document.body.addEventListener('pointerdown',e=>{
- if(mode!=='admin'||$('start').style.display!=='none'||e.target.closest('button,input,.panel,.top'))return;
- xp=e.clientX/innerWidth*100;yp=e.clientY/innerHeight*100;$('x').style.display='block';applyX();$('status').textContent='❌ X POSICIONADO';
-});
-$('size').oninput=e=>{size=+e.target.value;applyX()};
-function capture(){
- if(!video.videoWidth)return null;
- let vw=video.videoWidth,vh=video.videoHeight,tw=128,th=96,tr=tw/th,vr=vw/vh,sx=0,sy=0,sw=vw,sh=vh;
- if(vr>tr){sw=vh*tr;sx=(vw-sw)/2}else{sh=vw/tr;sy=(vh-sh)/2}
- ctx.drawImage(video,sx,sy,sw,sh,0,0,tw,th);return ctx.getImageData(0,0,tw,th)
+function mapClient(e){
+ let r=cam.getBoundingClientRect(),vw=cam.videoWidth,vh=cam.videoHeight,cr=r.width/r.height,vr=vw/vh;
+ let nx=e.clientX/r.width,ny=e.clientY/r.height;
+ if(vr>cr){let shown=vh*cr,crop=(vw-shown)/2;nx=(crop+nx*shown)/vw}
+ else {let shown=vw/cr,crop=(vh-shown)/2;ny=(crop+ny*shown)/vh}
+ return [nx,ny]
 }
-function desc(im){let a=[],d=im.data,w=im.width,h=im.height;for(let gy=0;gy<6;gy++)for(let gx=0;gx<8;gx++){let sum=0,sum2=0,n=0;for(let y=Math.floor(gy*h/6);y<Math.floor((gy+1)*h/6);y+=3)for(let x=Math.floor(gx*w/8);x<Math.floor((gx+1)*w/8);x+=3){let i=(y*w+x)*4,q=.299*d[i]+.587*d[i+1]+.114*d[i+2];sum+=q;sum2+=q*q;n++}let m=sum/n;a.push(m/255,Math.sqrt(Math.max(0,sum2/n-m*m))/128)}return a}
-function sim(a,b){let x=desc(a),y=desc(b),e=0;for(let i=0;i<x.length;i++)e+=Math.abs(x[i]-y[i]);return Math.max(0,1-e/x.length)}
-$('save').onclick=()=>{let im=capture();if(!im)return;ref=im;try{localStorage.setItem('ox_ref',work.toDataURL('image/jpeg',.8));localStorage.setItem('ox_cfg',JSON.stringify({xp,yp,size}))}catch(e){};$('status').textContent='✓ X E LOCAL SALVOS';$('help').textContent='Agora toque em PROCURAR, vire para outro lado e tente reencontrar este lugar.'};
-function load(){try{let c=JSON.parse(localStorage.getItem('ox_cfg')||'null');if(c){xp=c.xp;yp=c.yp;size=c.size;applyX()}let s=localStorage.getItem('ox_ref');if(s){let im=new Image;im.onload=()=>{ctx.drawImage(im,0,0,128,96);ref=ctx.getImageData(0,0,128,96)};im.src=s}}catch(e){}}
-load();
-$('clear').onclick=()=>{localStorage.removeItem('ox_ref');localStorage.removeItem('ox_cfg');ref=null;$('x').style.display='none';$('status').textContent='Dados apagados'};
-function setMode(m){mode=m;stable=0;$('admin').classList.toggle('on',m==='admin');$('hunt').classList.toggle('on',m==='hunt');$('adminControls').style.display=m==='admin'?'block':'none';$('huntControls').style.display=m==='hunt'?'block':'none';$('x').style.display='none';$('status').textContent=m==='admin'?'ADMIN — escolha o local':'🔎 PROCURANDO X';$('help').textContent=m==='admin'?'Toque na imagem para posicionar o X.':'Mova a câmera lentamente tentando reencontrar o cenário salvo.'}
-$('admin').onclick=()=>setMode('admin');$('hunt').onclick=()=>setMode('hunt');
-function loop(t){if(!running)return;requestAnimationFrame(loop);if(mode!=='hunt'||!ref||t-last<300)return;last=t;let cur=capture();if(!cur)return;let s=sim(ref,cur),p=Math.round(s*100);$('bar').style.width=p+'%';$('score').textContent='Semelhança visual: '+p+'%';if(s>.87)stable++;else stable=Math.max(0,stable-1);if(stable>=4){$('x').style.display='block';$('status').textContent='🔥 X DETECTADO';if(stable===4)setTimeout(()=>$('found').style.display='flex',450)}else $('x').style.display='none'}
-$('again').onclick=()=>{$('found').style.display='none';stable=0;$('x').style.display='none'};
+document.body.addEventListener('pointerdown',e=>{if(e.target.closest('button,.panel,.top')||$('start').style.display!=='none')return;let p=mapClient(e);ax=p[0];ay=p[1];fixed=false;showAt(ax,ay,true);$('status').textContent='PONTO ESCOLHIDO';$('help').textContent='Agora toque FIXAR X AQUI.'});
+function showAt(x,y,preview=false){
+ // convert normalized source coords approximately back to cover-screen coords
+ let vw=cam.videoWidth||innerWidth,vh=cam.videoHeight||innerHeight,cr=innerWidth/innerHeight,vr=vw/vh,sx=x,sy=y;
+ if(vr>cr){let shown=vh*cr,crop=(vw-shown)/2;sx=(x*vw-crop)/shown}else{let shown=vw/cr,crop=(vh-shown)/2;sy=(y*vh-crop)/shown}
+ $('x').style.left=(sx*100)+'%';$('x').style.top=(sy*100)+'%';$('x').style.display='block';
+ $('ret').style.left=(sx*100)+'%';$('ret').style.top=(sy*100)+'%';$('ret').style.display=preview?'block':'none'
+}
+function frame(){if(!cam.videoWidth)return null;ctx.drawImage(cam,0,0,320,240);return ctx.getImageData(0,0,320,240)}
+function gray(im){let d=im.data,g=new Uint8Array(320*240);for(let i=0,j=0;i<d.length;i+=4,j++)g[j]=(d[i]*77+d[i+1]*150+d[i+2]*29)>>8;return g}
+function scoreCorner(g,x,y){let s=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){let xx=x+dx,yy=y+dy;if(xx<2||xx>317||yy<2||yy>237)continue;let i=yy*320+xx,gx=g[i+1]-g[i-1],gy=g[i+320]-g[i-320];s+=Math.abs(gx)+Math.abs(gy)}return s}
+function seed(g,cx,cy){
+ let a=[],px=cx*320,py=cy*240;for(let y=Math.max(6,py-70);y<Math.min(234,py+70);y+=7)for(let x=Math.max(6,px-70);x<Math.min(314,px+70);x+=7){let sc=scoreCorner(g,x|0,y|0);if(sc>900)a.push({x:x|0,y:y|0,s:sc})}
+ a.sort((p,q)=>q.s-p.s);return a.slice(0,35).map(p=>({x:p.x,y:p.y}))
+}
+function patchErr(a,b,x1,y1,x2,y2){
+ let e=0,n=0;for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){let p=(y1+dy)*320+x1+dx,q=(y2+dy)*320+x2+dx;if(p>=0&&p<a.length&&q>=0&&q<b.length){e+=Math.abs(a[p]-b[q]);n++}}return n?e/n:999
+}
+function track(a,b,points){
+ let out=[];for(const p of points){let best=999,bx=p.x,by=p.y;for(let dy=-8;dy<=8;dy+=2)for(let dx=-8;dx<=8;dx+=2){let x=p.x+dx,y=p.y+dy;if(x<5||x>314||y<5||y>234)continue;let er=patchErr(a,b,p.x,p.y,x,y);if(er<best){best=er;bx=x;by=y}}if(best<35)out.push({x:bx,y:by,ox:p.x,oy:p.y,e:best})}return out
+}
+function median(a){if(!a.length)return 0;a=[...a].sort((x,y)=>x-y);return a[a.length>>1]}
+$('fix').onclick=()=>{let im=frame();if(!im)return;prev=gray(im);pts=seed(prev,ax,ay);if(pts.length<5){$('status').textContent='POUCOS DETALHES';$('help').textContent='Escolha uma região com mais textura/objetos e tente novamente.';return}fixed=true;$('ret').style.display='none';$('status').textContent='🔒 X FIXADO VISUALMENTE';$('help').textContent='Mova o celular DEVAGAR para os lados. O X deve acompanhar o ponto do ambiente.'};
+$('reset').onclick=()=>{fixed=false;prev=null;pts=[];$('x').style.display='none';$('ret').style.display='none';$('meter').style.width='0';$('status').textContent='ADMIN — marque o esconderijo'};
+function loop(t){requestAnimationFrame(loop);if(!fixed||t-last<90)return;last=t;let im=frame();if(!im)return;let cur=gray(im),tr=track(prev,cur,pts);
+ if(tr.length>=4){let dx=median(tr.map(p=>p.x-p.ox)),dy=median(tr.map(p=>p.y-p.oy));ax+=dx/320;ay+=dy/240;ax=Math.max(0,Math.min(1,ax));ay=Math.max(0,Math.min(1,ay));pts=tr.map(p=>({x:p.x,y:p.y}));showAt(ax,ay,false);let q=Math.min(100,Math.round(tr.length/25*100));$('meter').style.width=q+'%';$('quality').textContent='Pontos acompanhados: '+tr.length+' · qualidade '+q+'%';
+ if(pts.length<10){let extra=seed(cur,ax,ay);pts=pts.concat(extra).slice(0,35)}
+ }else{$('status').textContent='⚠ RASTREAMENTO PERDIDO';$('quality').textContent='Volte devagar para o último enquadramento ou reposicione o X.'}
+ prev=cur
+}
 })();
 </script></body></html>

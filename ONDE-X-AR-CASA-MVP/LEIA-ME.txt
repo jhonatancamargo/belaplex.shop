@@ -1,20 +1,28 @@
-ONDE X — CÂMERA + RECONHECIMENTO V2
+ONDE X — RASTREAMENTO VISUAL V3
 
-Esta versão mantém exatamente a abordagem de câmera que funcionou no iPhone:
-navigator.mediaDevices.getUserMedia + video autoplay muted playsinline.
+O que mudou:
+- Mantém a câmera getUserMedia + <video playsinline> que funcionou no iPhone.
+- O X não é apenas uma coordenada fixa da tela.
+- Ao fixar, o navegador seleciona detalhes visuais próximos ao X.
+- A cada quadro, procura esses detalhes na nova imagem e estima o deslocamento do ponto.
+- O X é reposicionado conforme o movimento visual estimado.
 
-Teste:
-1. Publique em HTTPS.
-2. Abra pelo Safari.
+COMO TESTAR
+1. Publique index.html em HTTPS.
+2. Abra no Safari do iPhone.
 3. ABRIR CÂMERA.
-4. ADMIN: toque na imagem onde quer o X.
-5. Ajuste o tamanho.
-6. FIXAR X + REFERÊNCIA.
-7. PROCURAR.
-8. Vire para outro lado e tente reencontrar o mesmo enquadramento.
-9. A barra mostra a semelhança; quando ela fica alta por vários ciclos, o X aparece.
+4. Aponte para uma região com MUITOS detalhes: quadro, estante, tijolos, azulejos, objetos.
+5. Toque na imagem exatamente onde quer o X.
+6. Toque FIXAR X AQUI.
+7. Mova o celular DEVAGAR para esquerda/direita e um pouco para cima/baixo.
+8. Observe a barra e o número de pontos acompanhados.
 
-Limitação:
-É reconhecimento visual simples do enquadramento inteiro. Ainda não é localização 3D nem consegue
-manter o X perfeitamente alinhado quando muda muito o ângulo. O objetivo desta versão é confirmar,
-sem quebrar a câmera validada, que o ciclo ADMIN -> salvar -> PROCURAR -> reconhecer funciona no iPhone.
+LIMITAÇÕES DO MVP
+- É rastreamento visual 2D local, não SLAM/âncora espacial 3D.
+- Movimentos rápidos, grande rotação, falta de luz e paredes lisas podem perder o rastreamento.
+- Ainda não persiste o mesmo ponto para outro celular.
+- Ainda não calcula oclusão (X atrás de objetos).
+- O objetivo é validar se o X consegue acompanhar um ponto visual do ambiente no Safari sem WebXR.
+
+SEGURANÇA
+Teste parado, em local seguro, longe de rua, escadas e obstáculos.
