@@ -2,118 +2,69 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>ONDE X — WebXR Espacial</title>
+<title>ONDE X — Visão Computacional</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090d;color:#fff;font-family:Arial,sans-serif}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
-#home{position:fixed;z-index:30;inset:0;background:#08090d;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{width:min(480px,100%);background:#111319;border:1px solid #30343d;border-radius:20px;padding:20px}.logo{font-size:31px;font-weight:950}.logo b{color:#ff5018}.muted{color:#a7abb4;font-size:13px;line-height:1.45}
-button{min-height:48px;border:1px solid #3a3e48;border-radius:12px;background:#191c23;color:#fff;font-weight:900;padding:0 14px;font-size:15px}button.primary{background:#ff5018;border-color:#ff5018}button:disabled{opacity:.45}
-.full{width:100%}.diag{margin:13px 0;background:#181b22;border-radius:12px;padding:11px;font-size:13px}.ok{color:#77d89a}.bad{color:#ff9b7d}
-#hud{position:fixed;z-index:20;inset:0;pointer-events:none;display:none}.top{position:absolute;left:9px;right:9px;top:9px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.pill,.panel{pointer-events:auto;background:#0b0d12e8;border:1px solid #373b45;border-radius:14px;padding:9px 11px}.pill{font-weight:900}.panel{position:absolute;left:9px;bottom:9px;width:min(440px,calc(100% - 18px))}
-.status{font-weight:950}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1;min-width:0}.small{font-size:12px;color:#b1b4bc}.reticle{position:absolute;left:50%;top:50%;width:34px;height:34px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #0005}.reticle:after{content:"";position:absolute;inset:11px;border-radius:50%;background:#ff5018}
-#sizeBox{display:none;margin-top:8px}input{width:100%}
-#msg{margin-top:6px}
-</style>
-</head><body>
-<canvas id="gl"></canvas>
-<div id="home"><div class="card">
- <div class="logo">ONDE <b>X</b></div><h2>Teste AR espacial</h2>
- <p class="muted">Este teste usa WebXR hit-test para detectar superfícies reais. Você aponta para uma mesa ou chão, toca para colocar o X e depois movimenta o celular para conferir se ele continua naquele ponto.</p>
- <div class="diag">
-   <div id="secure">⏳ Verificando HTTPS…</div>
-   <div id="xr">⏳ Verificando WebXR…</div>
-   <div id="ar">⏳ Verificando AR imersiva…</div>
- </div>
- <button id="start" class="primary full" disabled>INICIAR TESTE AR</button>
- <div id="why" class="muted" style="margin-top:10px"></div>
-</div></div>
-
-<div id="hud">
- <div class="top"><div class="pill">ONDE <span style="color:#ff5018">X</span></div><button id="exit">SAIR</button></div>
- <div class="reticle" id="reticle"></div>
- <div class="panel">
-   <div class="status" id="status">Mova o celular devagar para detectar uma superfície.</div>
-   <div id="msg" class="small">Aponte o centro da tela para uma mesa ou para o chão.</div>
-   <div id="sizeBox"><label class="small">Tamanho do X: <b id="sizeVal">30 cm</b></label><input id="size" type="range" min="8" max="100" value="30"></div>
-   <div class="row"><button id="place" class="primary" disabled>❌ COLOCAR X AQUI</button><button id="hide" disabled>👁 ESCONDER/VER</button></div>
- </div>
-</div>
-
-<script type="module">
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170.0/+esm";
-
-const $=id=>document.getElementById(id);
-let session=null,refSpace=null,viewerSpace=null,hitSource=null,latestHit=null,anchor=null;
-let renderer,scene,camera,reticle3D,xGroup=null,xVisible=true,placedMatrix=null;
-const canvas=$('gl');
-
-async function diagnostic(){
- $('secure').innerHTML=(window.isSecureContext?'<span class="ok">✓ HTTPS/contexto seguro</span>':'<span class="bad">✗ Precisa abrir em HTTPS</span>');
- if(!navigator.xr){$('xr').innerHTML='<span class="bad">✗ WebXR não existe neste navegador</span>';$('ar').innerHTML='<span class="bad">✗ AR espacial indisponível</span>';$('why').textContent='Este navegador/aparelho não oferece WebXR AR. Teste em um aparelho Android compatível com AR usando um navegador que ofereça immersive-ar.';return}
- $('xr').innerHTML='<span class="ok">✓ WebXR detectado</span>';
- try{
-  const ok=await navigator.xr.isSessionSupported('immersive-ar');
-  $('ar').innerHTML=ok?'<span class="ok">✓ immersive-ar disponível</span>':'<span class="bad">✗ immersive-ar não suportado neste aparelho/navegador</span>';
-  $('start').disabled=!(ok&&window.isSecureContext);
-  if(ok&&window.isSecureContext)$('why').textContent='Compatível. Toque em INICIAR TESTE AR.';
- }catch(e){$('ar').innerHTML='<span class="bad">✗ Não foi possível verificar immersive-ar</span>';$('why').textContent=e.message||String(e)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050609;color:#fff;font-family:Arial,sans-serif}
+video,canvas#view{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;background:#050609}
+#ui{position:fixed;z-index:10;inset:0;pointer-events:none}.top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:8px}
+.logo,.modes,.panel{pointer-events:auto;background:#0b0d12e8;border:1px solid #373b45;border-radius:14px}.logo{padding:9px 12px;font-size:21px;font-weight:950}.logo b{color:#ff5018}.modes{padding:5px;display:flex;gap:5px}
+button{min-height:44px;border:1px solid #3b404a;border-radius:10px;background:#191c23;color:#fff;font-weight:900;padding:0 11px}button.on,button.primary{background:#ff5018;border-color:#ff5018}button:disabled{opacity:.45}
+.panel{position:absolute;bottom:8px;left:8px;width:min(460px,calc(100% - 16px));padding:11px}.status{font-weight:950}.small{font-size:12px;color:#b4b7be;line-height:1.35}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1}
+#x{position:fixed;z-index:7;left:50%;top:50%;width:90px;height:90px;transform:translate(-50%,-50%);display:none;pointer-events:none;filter:drop-shadow(0 0 12px #ff501899)}
+#x:before,#x:after{content:"";position:absolute;left:50%;top:50%;width:18px;height:100px;border-radius:8px;background:linear-gradient(#ff9a2a,#ff3c16)}
+#x:before{transform:translate(-50%,-50%) rotate(45deg)}#x:after{transform:translate(-50%,-50%) rotate(-45deg)}
+#cross{position:fixed;z-index:6;left:50%;top:50%;width:38px;height:38px;border:2px solid #fff;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}#cross:after{content:"";position:absolute;inset:12px;background:#ff5018;border-radius:50%}
+#start{position:fixed;z-index:30;inset:0;background:#07080b;display:flex;align-items:center;justify-content:center;padding:20px}.card{width:min(470px,100%);text-align:center}.big{font-size:86px;font-weight:950;color:#ff5018}.card button{width:100%;height:54px}.error{display:none;margin-top:10px;background:#28130e;border:1px solid #71301f;border-radius:10px;padding:10px;text-align:left;color:#ffd2c4;font-size:12px}
+#refCanvas{display:none}.meter{height:8px;background:#252932;border-radius:20px;overflow:hidden;margin-top:8px}.meter span{display:block;height:100%;width:0;background:#ff5018}
+label{display:block;font-size:11px;color:#bbb;margin-top:7px}input[type=range]{width:100%}
+#found{position:fixed;z-index:40;inset:0;background:#000d;display:none;align-items:center;justify-content:center;text-align:center}
+</style></head><body>
+<video id="cam" autoplay playsinline muted></video><canvas id="view"></canvas><canvas id="refCanvas" width="160" height="120"></canvas>
+<div id="x"></div><div id="cross"></div>
+<div id="ui"><div class="top"><div class="logo">ONDE <b>X</b></div><div class="modes"><button id="admin" class="on">ADMIN</button><button id="hunt">PROCURAR</button></div></div>
+<div class="panel"><div id="status" class="status">ADMIN — escolha o esconderijo</div><div id="help" class="small">Aponte a câmera para uma área com detalhes visuais e capture a referência.</div>
+<div id="adminControls"><label>Tamanho do X: <b id="sizeV">35%</b></label><input id="size" type="range" min="10" max="120" value="35"><div class="row"><button id="capture" class="primary">📸 SALVAR ESTE LOCAL</button><button id="clear">LIMPAR</button></div></div>
+<div id="huntControls" style="display:none"><div class="meter"><span id="meter"></span></div><div id="score" class="small">Sem referência salva.</div></div></div></div>
+<div id="start"><div class="card"><div class="big">X</div><h1>ONDE X</h1><p class="small">Teste sem WebXR e sem instalação. A câmera compara o ambiente atual com a referência salva pelo ADMIN.</p><button id="go" class="primary">📷 ABRIR CÂMERA</button><div id="err" class="error"></div></div></div>
+<div id="found"><div><div class="big">X</div><h1>X ENCONTRADO!</h1><p>A câmera reconheceu uma forte semelhança com o local salvo.</p><button id="again">CONTINUAR</button></div></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id), video=$('cam'), view=$('view'), vctx=view.getContext('2d',{willReadFrequently:true}), ref=$('refCanvas'), rctx=ref.getContext('2d',{willReadFrequently:true});
+let mode='admin', running=false, reference=null, last=0, stable=0;
+let xSize=35;
+function resize(){view.width=innerWidth;view.height=innerHeight}addEventListener('resize',resize);resize();
+function loadRef(){try{const s=localStorage.getItem('ondex_ref');if(s){const im=new Image;im.onload=()=>{rctx.clearRect(0,0,160,120);rctx.drawImage(im,0,0,160,120);reference=rctx.getImageData(0,0,160,120);$('score').textContent='Referência carregada. Procure o mesmo enquadramento.'};im.src=s}}catch(e){}}
+loadRef();
+$('go').onclick=async()=>{try{if(!navigator.mediaDevices?.getUserMedia)throw new Error('Este navegador não liberou getUserMedia. Abra em HTTPS.');const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});video.srcObject=s;await video.play();$('start').style.display='none';running=true;requestAnimationFrame(loop)}catch(e){$('err').style.display='block';$('err').textContent='Não consegui abrir a câmera: '+(e.message||e.name)}};
+function sample(ctx,w,h){return ctx.getImageData(0,0,w,h)}
+function descriptor(data){
+ let arr=[],d=data.data,w=data.width,h=data.height;
+ const gx=8,gy=6;
+ for(let by=0;by<gy;by++)for(let bx=0;bx<gx;bx++){
+  let sum=0,sum2=0,n=0;
+  let x0=Math.floor(bx*w/gx),x1=Math.floor((bx+1)*w/gx),y0=Math.floor(by*h/gy),y1=Math.floor((by+1)*h/gy);
+  for(let y=y0;y<y1;y+=3)for(let x=x0;x<x1;x+=3){let i=(y*w+x)*4;let q=.299*d[i]+.587*d[i+1]+.114*d[i+2];sum+=q;sum2+=q*q;n++}
+  let mean=sum/n,variance=Math.max(0,sum2/n-mean*mean);arr.push(mean/255,Math.sqrt(variance)/128);
+ }return arr
 }
-diagnostic();
-
-function makeX(){
- const g=new THREE.Group();
- const mat=new THREE.MeshStandardMaterial({color:0xff4d18,roughness:.35,metalness:.1});
- const geo=new THREE.BoxGeometry(.055,.36,.035);
- const a=new THREE.Mesh(geo,mat),b=new THREE.Mesh(geo,mat);a.rotation.z=Math.PI/4;b.rotation.z=-Math.PI/4;g.add(a,b);
- const light=new THREE.PointLight(0xff7b32,1.4,1);light.position.set(0,.1,.12);g.add(light);return g;
+function similarity(a,b){let da=descriptor(a),db=descriptor(b),err=0;for(let i=0;i<da.length;i++)err+=Math.abs(da[i]-db[i]);return Math.max(0,1-err/da.length)}
+function centerCropTo(ctx,targetW,targetH){
+ let vw=video.videoWidth,vh=video.videoHeight;if(!vw||!vh)return false;
+ let ratio=targetW/targetH,vr=vw/vh,sx=0,sy=0,sw=vw,sh=vh;
+ if(vr>ratio){sw=vh*ratio;sx=(vw-sw)/2}else{sh=vw/ratio;sy=(vh-sh)/2}
+ ctx.drawImage(video,sx,sy,sw,sh,0,0,targetW,targetH);return true
 }
-function setupGL(){
- const gl=canvas.getContext('webgl',{xrCompatible:true,alpha:true,antialias:true});
- renderer=new THREE.WebGLRenderer({canvas,context:gl,alpha:true,antialias:true});
- renderer.autoClear=true;renderer.xr.enabled=true;
- scene=new THREE.Scene();camera=new THREE.PerspectiveCamera();
- scene.add(new THREE.HemisphereLight(0xffffff,0x555555,2));
- reticle3D=new THREE.Mesh(new THREE.RingGeometry(.055,.07,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xffffff}));
- reticle3D.matrixAutoUpdate=false;reticle3D.visible=false;scene.add(reticle3D);
+$('capture').onclick=()=>{if(!centerCropTo(rctx,160,120))return;reference=sample(rctx,160,120);try{localStorage.setItem('ondex_ref',ref.toDataURL('image/jpeg',.82));localStorage.setItem('ondex_size',String(xSize))}catch(e){};$('status').textContent='✓ LOCAL SALVO';$('help').textContent='Agora toque em PROCURAR, vire a câmera e tente reencontrar o mesmo local.'};
+$('clear').onclick=()=>{localStorage.removeItem('ondex_ref');reference=null;$('status').textContent='Referência apagada';$('x').style.display='none'};
+$('size').oninput=e=>{xSize=+e.target.value;$('sizeV').textContent=xSize+'%';$('x').style.transform=`translate(-50%,-50%) scale(${xSize/35})`};
+function setMode(m){mode=m;stable=0;$('admin').classList.toggle('on',m==='admin');$('hunt').classList.toggle('on',m==='hunt');$('adminControls').style.display=m==='admin'?'block':'none';$('huntControls').style.display=m==='hunt'?'block':'none';$('x').style.display='none';$('status').textContent=m==='admin'?'ADMIN — escolha o esconderijo':'🔎 PROCURANDO X';$('help').textContent=m==='admin'?'Aponte para uma área com detalhes e salve a referência.':'Mova a câmera devagar tentando reencontrar o enquadramento salvo.'}
+$('admin').onclick=()=>setMode('admin');$('hunt').onclick=()=>setMode('hunt');
+function loop(t){if(!running)return;requestAnimationFrame(loop);if(video.readyState<2)return;vctx.clearRect(0,0,view.width,view.height);if(mode!=='hunt'||!reference||t-last<250)return;last=t;
+ centerCropTo(rctx,160,120);let cur=sample(rctx,160,120),s=similarity(reference,cur);let pct=Math.round(s*100);$('meter').style.width=pct+'%';$('score').textContent='Semelhança visual: '+pct+'%';
+ if(s>.86)stable++;else stable=Math.max(0,stable-1);
+ if(stable>=4){$('x').style.display='block';$('status').textContent='🔥 X DETECTADO';if(stable===4)setTimeout(()=>$('found').style.display='flex',500)}
+ else $('x').style.display='none';
 }
-$('start').onclick=async()=>{
- try{
-  setupGL();
-  session=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['local','hit-test'],optionalFeatures:['anchors','dom-overlay'],domOverlay:{root:$('hud')}});
-  await renderer.xr.setSession(session);
-  refSpace=await session.requestReferenceSpace('local');
-  viewerSpace=await session.requestReferenceSpace('viewer');
-  hitSource=await session.requestHitTestSource({space:viewerSpace});
-  $('home').style.display='none';$('hud').style.display='block';
-  session.addEventListener('end',()=>{$('home').style.display='flex';$('hud').style.display='none';session=null});
-  session.requestAnimationFrame(frame);
- }catch(e){$('why').textContent='Não foi possível iniciar: '+(e.message||e.name);$('home').style.display='flex'}
-};
-function frame(t,frame){
- const s=frame.session;s.requestAnimationFrame(frame);
- const hits=hitSource?frame.getHitTestResults(hitSource):[];
- latestHit=hits.length?hits[0]:null;
- if(latestHit&&!xGroup){
-  const pose=latestHit.getPose(refSpace);reticle3D.visible=true;reticle3D.matrix.fromArray(pose.transform.matrix);
-  $('place').disabled=false;$('status').textContent='✓ SUPERFÍCIE DETECTADA';$('msg').textContent='Toque em COLOCAR X AQUI.';
- }else if(!latestHit&&!xGroup){reticle3D.visible=false;$('place').disabled=true}
- if(anchor&&xGroup){
-  const pose=frame.getPose(anchor.anchorSpace,refSpace);
-  if(pose){xGroup.visible=xVisible;xGroup.matrix.fromArray(pose.transform.matrix)}
- } else if(xGroup&&placedMatrix){xGroup.matrix.copy(placedMatrix);xGroup.visible=xVisible}
- renderer.render(scene,camera);
-}
-$('place').onclick=async()=>{
- if(!latestHit)return;
- const pose=latestHit.getPose(refSpace);placedMatrix=new THREE.Matrix4().fromArray(pose.transform.matrix);
- if(xGroup)scene.remove(xGroup);xGroup=makeX();xGroup.matrixAutoUpdate=false;xGroup.matrix.copy(placedMatrix);scene.add(xGroup);
- try{if(typeof latestHit.createAnchor==='function')anchor=await latestHit.createAnchor()}catch(e){anchor=null}
- reticle3D.visible=false;$('place').disabled=true;$('hide').disabled=false;$('sizeBox').style.display='block';
- $('status').textContent=anchor?'❌ X ANCORADO NO AMBIENTE':'❌ X POSICIONADO';
- $('msg').textContent=anchor?'Agora vire o celular, dê alguns passos e volte. O X deve continuar preso ao ponto físico.':'Seu aparelho não ativou XRAnchor; o teste usa a referência espacial da sessão e pode derivar mais.';
-};
-$('size').oninput=e=>{if(!xGroup)return;const cm=+e.target.value;$('sizeVal').textContent=cm+' cm';const scale=cm/30;xGroup.scale.setScalar(scale)};
-$('hide').onclick=()=>{xVisible=!xVisible;$('hide').textContent=xVisible?'🙈 ESCONDER':'👁 MOSTRAR'};
-$('exit').onclick=()=>session&&session.end();
+$('again').onclick=()=>{$('found').style.display='none';stable=0;$('x').style.display='none'};
+})();
 </script></body></html>
