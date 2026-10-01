@@ -1,75 +1,72 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ONDE X — Teste Câmera</title>
+<html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>ONDE X — Teste 2</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,sans-serif;color:#fff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font-family:Arial,sans-serif}
 #camera{position:fixed;z-index:1;inset:0;width:100%;height:100%;object-fit:cover;background:#111}
-#overlay{position:fixed;z-index:5;inset:0;pointer-events:none}
-.top{position:absolute;top:12px;left:12px;background:#0b0d12dd;border:1px solid #444;border-radius:14px;padding:10px 13px;font-weight:950;font-size:20px}.top b{color:#ff5018}
-.bottom{position:absolute;left:12px;right:12px;bottom:12px;background:#0b0d12e8;border:1px solid #444;border-radius:14px;padding:12px;text-align:center}
-#start{position:fixed;z-index:20;inset:0;background:#08090d;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{width:min(460px,100%);text-align:center}.x{font-size:90px;font-weight:950;color:#ff5018}
-button{width:100%;min-height:56px;border:0;border-radius:13px;background:#ff5018;color:#fff;font-size:17px;font-weight:950}
-#error{display:none;margin-top:12px;padding:11px;background:#2b130e;border:1px solid #74311e;border-radius:11px;color:#ffd6c8;text-align:left;font-size:13px;line-height:1.4}
-#debug{margin-top:12px;color:#aaa;font-size:12px;word-break:break-word}
-</style>
-</head>
-<body>
+#work{display:none}
+#x{position:fixed;z-index:5;left:50%;top:50%;width:90px;height:90px;transform:translate(-50%,-50%);display:none;pointer-events:none}
+#x:before,#x:after{content:"";position:absolute;left:50%;top:50%;width:18px;height:100px;border-radius:9px;background:linear-gradient(#ff9b29,#ff3e16);box-shadow:0 0 16px #ff4e1888}
+#x:before{transform:translate(-50%,-50%) rotate(45deg)}#x:after{transform:translate(-50%,-50%) rotate(-45deg)}
+#ui{position:fixed;z-index:10;inset:0;pointer-events:none}.top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:8px}
+.logo,.tabs,.panel{pointer-events:auto;background:#0a0c11e8;border:1px solid #3a3e47;border-radius:14px}.logo{padding:9px 12px;font-size:21px;font-weight:950}.logo b{color:#ff5018}.tabs{padding:5px;display:flex;gap:5px}
+button{min-height:44px;border:1px solid #3c414b;border-radius:10px;background:#191c23;color:#fff;font-weight:900;padding:0 11px}button.on,button.primary{background:#ff5018;border-color:#ff5018}
+.panel{position:absolute;left:8px;bottom:8px;width:min(460px,calc(100% - 16px));padding:11px}.status{font-weight:950}.small{font-size:12px;color:#b6b9c0;line-height:1.35}.row{display:flex;gap:6px;margin-top:8px}.row button{flex:1}
+label{font-size:11px;color:#ccc;display:flex;justify-content:space-between;margin-top:6px}input{width:100%}.meter{height:8px;background:#282c34;border-radius:20px;overflow:hidden;margin-top:8px}.meter span{display:block;height:100%;width:0;background:#ff5018}
+#start{position:fixed;z-index:30;inset:0;background:#08090d;display:flex;align-items:center;justify-content:center;padding:20px}.card{width:min(460px,100%);text-align:center}.bigx{font-size:88px;font-weight:950;color:#ff5018}.card button{width:100%;height:56px;font-size:17px}
+#error{display:none;margin-top:10px;background:#29140e;border:1px solid #71311f;border-radius:10px;padding:10px;color:#ffd4c7;text-align:left;font-size:12px}
+#found{position:fixed;z-index:40;inset:0;background:#000d;display:none;align-items:center;justify-content:center;text-align:center}
+</style></head><body>
 <video id="camera" autoplay muted playsinline webkit-playsinline></video>
-
-<div id="overlay">
- <div class="top">ONDE <b>X</b></div>
- <div class="bottom"><b id="state">CÂMERA ATIVA</b><br><span style="font-size:12px;color:#aaa">Se você está vendo o ambiente atrás desta interface, o teste passou.</span></div>
-</div>
-
-<div id="start">
- <div class="card">
-  <div class="x">X</div>
-  <h1>Teste da câmera</h1>
-  <p style="color:#aaa">Esta versão não tem AR nem reconhecimento. Ela serve somente para confirmar a câmera do Safari.</p>
-  <button id="open">📷 ABRIR CÂMERA</button>
-  <div id="error"></div>
-  <div id="debug"></div>
+<canvas id="work" width="128" height="96"></canvas>
+<div id="x"></div>
+<div id="ui">
+ <div class="top"><div class="logo">ONDE <b>X</b></div><div class="tabs"><button id="admin" class="on">ADMIN</button><button id="hunt">PROCURAR</button></div></div>
+ <div class="panel">
+  <div id="status" class="status">ADMIN — escolha o local</div>
+  <div id="help" class="small">Aponte para um ponto com detalhes e toque na tela onde quer deixar o X.</div>
+  <div id="adminControls">
+   <label><span>Tamanho</span><b id="sizeVal">100%</b></label><input id="size" type="range" min="20" max="180" value="100">
+   <div class="row"><button id="save" class="primary">📸 FIXAR X + REFERÊNCIA</button><button id="clear">LIMPAR</button></div>
+  </div>
+  <div id="huntControls" style="display:none">
+   <div class="meter"><span id="bar"></span></div><div id="score" class="small">Procure o local salvo.</div>
+  </div>
  </div>
 </div>
-
+<div id="start"><div class="card"><div class="bigx">X</div><h1>ONDE X — Teste 2</h1><p class="small">Usa exatamente o mesmo mecanismo de câmera que funcionou no seu iPhone.</p><button id="open" class="primary">📷 ABRIR CÂMERA</button><div id="error"></div></div></div>
+<div id="found"><div><div class="bigx">X</div><h1>X ENCONTRADO!</h1><button id="again">CONTINUAR</button></div></div>
 <script>
-const video=document.getElementById('camera');
-const start=document.getElementById('start');
-const error=document.getElementById('error');
-const debug=document.getElementById('debug');
-document.getElementById('open').addEventListener('click', async ()=>{
- error.style.display='none';
- debug.textContent='Solicitando câmera...';
- try{
-   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-     throw new Error('getUserMedia não está disponível neste navegador/contexto.');
-   }
-   const stream=await navigator.mediaDevices.getUserMedia({
-     audio:false,
-     video:{facingMode:'environment'}
-   });
-   video.srcObject=stream;
-   video.muted=true;
-   video.setAttribute('playsinline','');
-   await video.play();
-   debug.textContent='Vídeo iniciado: '+video.videoWidth+'x'+video.videoHeight;
-   start.style.display='none';
- }catch(e){
-   error.style.display='block';
-   error.innerHTML='<b>A câmera não iniciou.</b><br>'+String(e.name||'Erro')+': '+String(e.message||e);
-   debug.textContent='Protocolo: '+location.protocol+' | Navegador: '+navigator.userAgent;
- }
+(()=>{
+const $=id=>document.getElementById(id),video=$('camera'),work=$('work'),ctx=work.getContext('2d',{willReadFrequently:true});
+let mode='admin',ref=null,xp=50,yp=50,size=100,running=false,stable=0,last=0;
+function applyX(){let el=$('x');el.style.left=xp+'%';el.style.top=yp+'%';el.style.transform=`translate(-50%,-50%) scale(${size/100})`; $('sizeVal').textContent=size+'%'}
+applyX();
+$('open').onclick=async()=>{try{
+ const s=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'environment'}});
+ video.srcObject=s;video.muted=true;video.setAttribute('playsinline','');await video.play();$('start').style.display='none';running=true;requestAnimationFrame(loop)
+}catch(e){$('error').style.display='block';$('error').textContent=(e.name||'Erro')+': '+(e.message||e)}};
+document.body.addEventListener('pointerdown',e=>{
+ if(mode!=='admin'||$('start').style.display!=='none'||e.target.closest('button,input,.panel,.top'))return;
+ xp=e.clientX/innerWidth*100;yp=e.clientY/innerHeight*100;$('x').style.display='block';applyX();$('status').textContent='❌ X POSICIONADO';
 });
-video.addEventListener('loadedmetadata',()=>{
- debug.textContent='Metadados da câmera: '+video.videoWidth+'x'+video.videoHeight;
-});
-video.addEventListener('playing',()=>{
- document.getElementById('state').textContent='✓ CÂMERA ATIVA';
-});
-</script>
-</body></html>
+$('size').oninput=e=>{size=+e.target.value;applyX()};
+function capture(){
+ if(!video.videoWidth)return null;
+ let vw=video.videoWidth,vh=video.videoHeight,tw=128,th=96,tr=tw/th,vr=vw/vh,sx=0,sy=0,sw=vw,sh=vh;
+ if(vr>tr){sw=vh*tr;sx=(vw-sw)/2}else{sh=vw/tr;sy=(vh-sh)/2}
+ ctx.drawImage(video,sx,sy,sw,sh,0,0,tw,th);return ctx.getImageData(0,0,tw,th)
+}
+function desc(im){let a=[],d=im.data,w=im.width,h=im.height;for(let gy=0;gy<6;gy++)for(let gx=0;gx<8;gx++){let sum=0,sum2=0,n=0;for(let y=Math.floor(gy*h/6);y<Math.floor((gy+1)*h/6);y+=3)for(let x=Math.floor(gx*w/8);x<Math.floor((gx+1)*w/8);x+=3){let i=(y*w+x)*4,q=.299*d[i]+.587*d[i+1]+.114*d[i+2];sum+=q;sum2+=q*q;n++}let m=sum/n;a.push(m/255,Math.sqrt(Math.max(0,sum2/n-m*m))/128)}return a}
+function sim(a,b){let x=desc(a),y=desc(b),e=0;for(let i=0;i<x.length;i++)e+=Math.abs(x[i]-y[i]);return Math.max(0,1-e/x.length)}
+$('save').onclick=()=>{let im=capture();if(!im)return;ref=im;try{localStorage.setItem('ox_ref',work.toDataURL('image/jpeg',.8));localStorage.setItem('ox_cfg',JSON.stringify({xp,yp,size}))}catch(e){};$('status').textContent='✓ X E LOCAL SALVOS';$('help').textContent='Agora toque em PROCURAR, vire para outro lado e tente reencontrar este lugar.'};
+function load(){try{let c=JSON.parse(localStorage.getItem('ox_cfg')||'null');if(c){xp=c.xp;yp=c.yp;size=c.size;applyX()}let s=localStorage.getItem('ox_ref');if(s){let im=new Image;im.onload=()=>{ctx.drawImage(im,0,0,128,96);ref=ctx.getImageData(0,0,128,96)};im.src=s}}catch(e){}}
+load();
+$('clear').onclick=()=>{localStorage.removeItem('ox_ref');localStorage.removeItem('ox_cfg');ref=null;$('x').style.display='none';$('status').textContent='Dados apagados'};
+function setMode(m){mode=m;stable=0;$('admin').classList.toggle('on',m==='admin');$('hunt').classList.toggle('on',m==='hunt');$('adminControls').style.display=m==='admin'?'block':'none';$('huntControls').style.display=m==='hunt'?'block':'none';$('x').style.display='none';$('status').textContent=m==='admin'?'ADMIN — escolha o local':'🔎 PROCURANDO X';$('help').textContent=m==='admin'?'Toque na imagem para posicionar o X.':'Mova a câmera lentamente tentando reencontrar o cenário salvo.'}
+$('admin').onclick=()=>setMode('admin');$('hunt').onclick=()=>setMode('hunt');
+function loop(t){if(!running)return;requestAnimationFrame(loop);if(mode!=='hunt'||!ref||t-last<300)return;last=t;let cur=capture();if(!cur)return;let s=sim(ref,cur),p=Math.round(s*100);$('bar').style.width=p+'%';$('score').textContent='Semelhança visual: '+p+'%';if(s>.87)stable++;else stable=Math.max(0,stable-1);if(stable>=4){$('x').style.display='block';$('status').textContent='🔥 X DETECTADO';if(stable===4)setTimeout(()=>$('found').style.display='flex',450)}else $('x').style.display='none'}
+$('again').onclick=()=>{$('found').style.display='none';stable=0;$('x').style.display='none'};
+})();
+</script></body></html>

@@ -1,21 +1,20 @@
-ONDE X — TESTE MÍNIMO DE CÂMERA PARA iPHONE
+ONDE X — CÂMERA + RECONHECIMENTO V2
 
-Este arquivo foi reduzido ao mínimo possível:
-- sem WebXR
-- sem AR.js
-- sem Three.js
-- sem canvas
-- sem visão computacional
-- sem bibliotecas externas
+Esta versão mantém exatamente a abordagem de câmera que funcionou no iPhone:
+navigator.mediaDevices.getUserMedia + video autoplay muted playsinline.
 
-Ele usa apenas navigator.mediaDevices.getUserMedia() + <video playsinline>.
+Teste:
+1. Publique em HTTPS.
+2. Abra pelo Safari.
+3. ABRIR CÂMERA.
+4. ADMIN: toque na imagem onde quer o X.
+5. Ajuste o tamanho.
+6. FIXAR X + REFERÊNCIA.
+7. PROCURAR.
+8. Vire para outro lado e tente reencontrar o mesmo enquadramento.
+9. A barra mostra a semelhança; quando ela fica alta por vários ciclos, o X aparece.
 
-TESTE:
-1. Substitua a versão anterior no seu domínio HTTPS por este index.html.
-2. Abra no Safari do iPhone.
-3. Toque ABRIR CÂMERA.
-4. Toque Permitir.
-5. Se a imagem da câmera aparecer atrás do logo ONDE X, o mecanismo-base está funcionando.
-
-Depois disso, a próxima versão deve manter exatamente este código de câmera e adicionar o X por cima,
-sem alterar a inicialização que foi validada.
+Limitação:
+É reconhecimento visual simples do enquadramento inteiro. Ainda não é localização 3D nem consegue
+manter o X perfeitamente alinhado quando muda muito o ângulo. O objetivo desta versão é confirmar,
+sem quebrar a câmera validada, que o ciclo ADMIN -> salvar -> PROCURAR -> reconhecer funciona no iPhone.
